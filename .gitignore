@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Xcode
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
+# Go
+server/vendor/
+server/tmp/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment
+.env
+.env.local
+
+# Build
+*.o
+*.a
+*.dylib
+
+# Docker
+docker-compose.override.yml
+
+# Gemini agent brain (local artifacts)
+.gemini/antigravity/
+
+# Skills lock
+skills-lock.json

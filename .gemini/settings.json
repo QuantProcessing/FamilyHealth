@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "shipswift": {
+      "url": "https://api.shipswift.app/mcp",
+      "type": "http"
+    }
+  }
+}

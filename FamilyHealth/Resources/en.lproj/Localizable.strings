@@ -1,0 +1,119 @@
+/* English */
+"app_name" = "FamilyHealth";
+"tab_home" = "Home";
+"tab_records" = "Records";
+"tab_ai" = "AI";
+"tab_family" = "Family";
+"tab_settings" = "Settings";
+
+/* Onboarding */
+"onboarding_title_1" = "Your Family Health Manager";
+"onboarding_desc_1" = "Easily manage health reports and medical records";
+"onboarding_title_2" = "AI-Powered Analysis";
+"onboarding_desc_2" = "Connect AI models to analyze your health data";
+"onboarding_title_3" = "Local First, Privacy First";
+"onboarding_desc_3" = "Data stored locally by default, fully private";
+"get_started" = "Get Started";
+
+/* Auth */
+"login_title" = "Login";
+"phone_placeholder" = "Phone Number";
+"name_placeholder" = "Name";
+"local_mode" = "Local Mode";
+"remote_mode" = "Remote Mode";
+"server_url_placeholder" = "Server URL";
+
+/* Home */
+"greeting_morning" = "Good Morning";
+"greeting_afternoon" = "Good Afternoon";
+"greeting_evening" = "Good Evening";
+"reports_count" = "Reports";
+"cases_count" = "Cases";
+"family_members" = "Family";
+"last_checkup" = "Last Checkup";
+"quick_actions" = "Quick Actions";
+"upload_report" = "Upload Report";
+"add_case" = "Add Case";
+"ai_chat" = "AI Chat";
+"scan_qr" = "Scan QR";
+"recent_records" = "Recent Records";
+"no_records" = "No records yet";
+
+/* Records */
+"health_records" = "Health Records";
+"reports" = "Reports";
+"cases" = "Cases";
+"search" = "Search";
+"no_reports" = "No reports yet";
+"no_cases" = "No cases yet";
+
+/* Upload */
+"upload_report_title" = "Upload Report";
+"select_files" = "Select Files";
+"fill_info" = "Fill Info";
+"confirm_save" = "Confirm";
+"report_title" = "Report Title";
+"hospital_name" = "Hospital";
+"report_date" = "Report Date";
+"report_type" = "Report Type";
+"notes" = "Notes";
+"previous" = "Previous";
+"next" = "Next";
+"save" = "Save";
+"cancel" = "Cancel";
+
+/* Case */
+"add_case_title" = "Add Medical Case";
+"visit_date" = "Visit Date";
+"doctor_name" = "Doctor";
+"diagnosis" = "Diagnosis";
+"symptoms" = "Symptoms";
+"add_symptom" = "Add Symptom";
+"medications" = "Medications";
+"add_medication" = "Add Medication";
+"drug_name" = "Drug Name";
+"dosage" = "Dosage";
+"frequency" = "Frequency";
+
+/* Family */
+"family_groups" = "Family Groups";
+"create_group" = "Create Group";
+"group_name" = "Group Name";
+"members" = "members";
+"admin" = "Admin";
+"member" = "Member";
+"invite_qr" = "Generate QR Invite";
+"invite_phone" = "Invite by Phone";
+"leave_group" = "Leave Group";
+"delete_group" = "Delete Group";
+"max_groups_hint" = "You can join up to 2 groups";
+
+/* AI */
+"ai_assistant" = "AI Assistant";
+"new_conversation" = "New Chat";
+"configure_ai" = "Configure AI Model";
+"ai_analysis" = "AI Analysis";
+"no_ai_config" = "Please configure an AI model in Settings first";
+
+/* Settings */
+"settings" = "Settings";
+"profile" = "Profile";
+"running_mode" = "Running Mode";
+"ai_models" = "AI Models";
+"language" = "Language";
+"about" = "About";
+"version" = "Version";
+"privacy_policy" = "Privacy Policy";
+"api_endpoint" = "API Endpoint";
+"api_key" = "API Key";
+"model_name" = "Model Name";
+"set_default" = "Set as Default";
+"test_connection" = "Test Connection";
+"delete" = "Delete";
+"edit" = "Edit";
+
+/* Alerts */
+"save_success" = "Saved successfully";
+"save_failed" = "Save failed";
+"delete_confirm" = "Confirm Delete";
+"copied" = "Copied to clipboard";

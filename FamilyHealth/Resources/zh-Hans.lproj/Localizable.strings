@@ -1,0 +1,119 @@
+/* Chinese (Simplified) - Default */
+"app_name" = "家庭健康";
+"tab_home" = "首页";
+"tab_records" = "档案";
+"tab_ai" = "AI";
+"tab_family" = "家庭";
+"tab_settings" = "设置";
+
+/* Onboarding */
+"onboarding_title_1" = "全家人的健康管家";
+"onboarding_desc_1" = "轻松管理体检报告和病例记录";
+"onboarding_title_2" = "AI 智能分析";
+"onboarding_desc_2" = "连接 AI 模型，智能解读健康数据";
+"onboarding_title_3" = "本地优先，隐私至上";
+"onboarding_desc_3" = "数据默认存储在本地，完全私密";
+"get_started" = "开始使用";
+
+/* Auth */
+"login_title" = "登录";
+"phone_placeholder" = "手机号";
+"name_placeholder" = "姓名";
+"local_mode" = "本地模式";
+"remote_mode" = "联网模式";
+"server_url_placeholder" = "服务器地址";
+
+/* Home */
+"greeting_morning" = "早上好";
+"greeting_afternoon" = "下午好";
+"greeting_evening" = "晚上好";
+"reports_count" = "体检报告";
+"cases_count" = "病例记录";
+"family_members" = "家庭成员";
+"last_checkup" = "上次体检";
+"quick_actions" = "快捷操作";
+"upload_report" = "上传报告";
+"add_case" = "录入病例";
+"ai_chat" = "AI 对话";
+"scan_qr" = "扫码加入";
+"recent_records" = "最近记录";
+"no_records" = "暂无记录";
+
+/* Records */
+"health_records" = "健康档案";
+"reports" = "体检报告";
+"cases" = "病例记录";
+"search" = "搜索";
+"no_reports" = "暂无体检报告";
+"no_cases" = "暂无病例记录";
+
+/* Upload */
+"upload_report_title" = "上传体检报告";
+"select_files" = "选择文件";
+"fill_info" = "填写信息";
+"confirm_save" = "确认保存";
+"report_title" = "报告标题";
+"hospital_name" = "医院名称";
+"report_date" = "体检日期";
+"report_type" = "报告类型";
+"notes" = "备注";
+"previous" = "上一步";
+"next" = "下一步";
+"save" = "保存";
+"cancel" = "取消";
+
+/* Case */
+"add_case_title" = "录入病例";
+"visit_date" = "就诊日期";
+"doctor_name" = "主治医生";
+"diagnosis" = "诊断结果";
+"symptoms" = "症状";
+"add_symptom" = "添加症状";
+"medications" = "用药记录";
+"add_medication" = "添加用药记录";
+"drug_name" = "药品名称";
+"dosage" = "用量";
+"frequency" = "频率";
+
+/* Family */
+"family_groups" = "家庭组";
+"create_group" = "创建家庭组";
+"group_name" = "家庭组名称";
+"members" = "位成员";
+"admin" = "管理员";
+"member" = "成员";
+"invite_qr" = "生成邀请二维码";
+"invite_phone" = "通过手机号邀请";
+"leave_group" = "退出家庭组";
+"delete_group" = "解散家庭组";
+"max_groups_hint" = "最多可加入 2 个家庭组";
+
+/* AI */
+"ai_assistant" = "AI 助手";
+"new_conversation" = "新建对话";
+"configure_ai" = "配置 AI 模型";
+"ai_analysis" = "AI 智能分析";
+"no_ai_config" = "请先在设置中配置 AI 模型";
+
+/* Settings */
+"settings" = "设置";
+"profile" = "个人信息";
+"running_mode" = "运行模式";
+"ai_models" = "AI 模型配置";
+"language" = "语言";
+"about" = "关于";
+"version" = "版本";
+"privacy_policy" = "隐私政策";
+"api_endpoint" = "API 地址";
+"api_key" = "API Key";
+"model_name" = "模型名称";
+"set_default" = "设为默认";
+"test_connection" = "测试连接";
+"delete" = "删除";
+"edit" = "编辑";
+
+/* Alerts */
+"save_success" = "保存成功";
+"save_failed" = "保存失败";
+"delete_confirm" = "确认删除";
+"copied" = "已复制到剪贴板";
