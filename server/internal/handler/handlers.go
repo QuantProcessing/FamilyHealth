@@ -60,7 +60,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 func (h *AuthHandler) GetMe(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	user, err := h.svc.Auth.repos.User.FindByID(userID) //nolint
+	user, err := h.svc.Auth.GetUser(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -70,7 +70,7 @@ func (h *AuthHandler) GetMe(c *gin.Context) {
 
 func (h *AuthHandler) UpdateMe(c *gin.Context) {
 	userID := middleware.GetUserID(c)
-	user, err := h.svc.Auth.repos.User.FindByID(userID) //nolint
+	user, err := h.svc.Auth.GetUser(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
 		return
@@ -79,7 +79,7 @@ func (h *AuthHandler) UpdateMe(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	h.svc.Auth.repos.User.Update(user) //nolint
+	h.svc.Auth.UpdateUser(user)
 	c.JSON(http.StatusOK, user)
 }
 

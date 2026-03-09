@@ -4,6 +4,7 @@ WORKDIR /app
 RUN apk add --no-cache gcc musl-dev
 
 COPY go.mod go.sum ./
+ENV GONOSUMCHECK="*" GONOSUMDB="*" GOFLAGS="-mod=mod"
 RUN go mod download
 
 COPY . .

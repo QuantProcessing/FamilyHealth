@@ -61,6 +61,14 @@ func (s *AuthService) generateToken(userID uuid.UUID) (string, error) {
 	return token.SignedString([]byte(s.jwtSecret))
 }
 
+func (s *AuthService) GetUser(id uuid.UUID) (*model.User, error) {
+	return s.repos.User.FindByID(id)
+}
+
+func (s *AuthService) UpdateUser(user *model.User) error {
+	return s.repos.User.Update(user)
+}
+
 // ============ Report Service ============
 
 type ReportService struct {
