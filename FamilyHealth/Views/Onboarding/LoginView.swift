@@ -67,9 +67,11 @@ struct LoginView: View {
                     // Description
                     VStack(spacing: FHSpacing.sm) {
                         HStack(spacing: FHSpacing.sm) {
-                            Image(systemName: "lock.shield")
+                            Image(systemName: BuildConfig.isServerMode ? "cloud.fill" : "lock.shield")
                                 .foregroundStyle(FHColors.success)
-                            Text("所有数据安全存储在您的设备上")
+                            Text(BuildConfig.isServerMode
+                                 ? "账户数据通过服务器同步"
+                                 : "所有数据安全存储在您的设备上")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -119,10 +121,21 @@ struct LoginView: View {
 
     private func login() async {
         do {
+            #if SERVER_MODE
+            // Server mode: register via server API, then create local user
+            let api = APIClient(baseURL: BuildConfig.serverURL)
+            let authService = RemoteAuthService(api: api)
+            let user = try await authService.createLocalUser(
+                phone: phone, name: name, gender: gender
+            )
+            appState.currentUserId = user.id.uuidString
+            #else
+            // Local mode: create user in local SwiftData
             let user = try await services.authService.createLocalUser(
                 phone: phone, name: name, gender: gender
             )
             appState.currentUserId = user.id.uuidString
+            #endif
         } catch {
             errorMessage = error.localizedDescription
         }

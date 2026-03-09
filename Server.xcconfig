@@ -1,0 +1,6 @@
+// Server mode — requires backend server
+// Enables: server registration/login, built-in AI proxy
+// Set SERVER_URL to your deployment address
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SERVER_MODE
+SERVER_URL = http:/$()/localhost:8080

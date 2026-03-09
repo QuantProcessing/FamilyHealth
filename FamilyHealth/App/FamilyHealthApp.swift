@@ -28,7 +28,8 @@ struct FamilyHealthApp: App {
             ])
             let config = ModelConfiguration(
                 schema: schema,
-                isStoredInMemoryOnly: false
+                isStoredInMemoryOnly: false,
+                cloudKitDatabase: .automatic  // iCloud sync — data stays local, syncs to iCloud
             )
             modelContainer = try ModelContainer(for: schema, configurations: [config])
         } catch {
