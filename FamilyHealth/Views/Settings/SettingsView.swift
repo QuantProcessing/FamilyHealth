@@ -236,11 +236,12 @@ struct AddAIModelView: View {
     @Query private var existingConfigs: [AIModelConfig]
 
     @State private var name = ""
-    @State private var provider: AIModelConfig.Provider = .openai
+    @State private var provider: AIModelConfig.Provider = .deepseek
     @State private var apiEndpoint = ""
     @State private var apiKey = ""
     @State private var modelName = ""
     @State private var isDefault = false
+    @State private var useBuiltIn = true
     @State private var testResult: String?
     @State private var testPassed = false
     @State private var isTesting = false
@@ -248,54 +249,71 @@ struct AddAIModelView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("基本信息") {
-                    TextField("配置名称", text: $name)
-
+                Section("选择 AI 模型") {
                     Picker("提供商", selection: $provider) {
                         ForEach(AIModelConfig.Provider.allCases, id: \.self) { p in
-                            Text(p.displayName).tag(p)
+                            Label(p.displayName, systemImage: p.iconName).tag(p)
                         }
+                    }
+                    .onChange(of: provider) { _, newVal in
+                        name = newVal.displayName
+                        apiEndpoint = newVal.defaultEndpoint
+                        modelName = newVal.defaultModel
+                        testPassed = false
+                        testResult = nil
+                    }
+
+                    TextField("配置名称", text: $name)
+                }
+
+                if provider != .custom {
+                    Section {
+                        Toggle("使用内置代理（免费）", isOn: $useBuiltIn)
+                    } footer: {
+                        Text(useBuiltIn ? "无需 API Key，通过 FamilyHealth 服务器转发" : "使用自己的 API Key 直接调用")
                     }
                 }
 
-                Section("API 配置") {
-                    TextField("API 地址（如 https://api.openai.com/v1）", text: $apiEndpoint)
-                        .keyboardType(.URL)
-                        .textInputAutocapitalization(.never)
-                        .onChange(of: apiEndpoint) { _, _ in testPassed = false }
+                if !useBuiltIn || provider == .custom {
+                    Section("API 配置") {
+                        TextField("API 地址", text: $apiEndpoint)
+                            .keyboardType(.URL)
+                            .textInputAutocapitalization(.never)
+                            .onChange(of: apiEndpoint) { _, _ in testPassed = false }
 
-                    SecureField("API Key", text: $apiKey)
-                        .onChange(of: apiKey) { _, _ in testPassed = false }
+                        SecureField("API Key", text: $apiKey)
+                            .onChange(of: apiKey) { _, _ in testPassed = false }
 
-                    TextField("模型名称（如 gpt-4o）", text: $modelName)
-                        .textInputAutocapitalization(.never)
-                        .onChange(of: modelName) { _, _ in testPassed = false }
-                }
+                        TextField("模型名称", text: $modelName)
+                            .textInputAutocapitalization(.never)
+                            .onChange(of: modelName) { _, _ in testPassed = false }
+                    }
 
-                Section {
-                    Button {
-                        runTest()
-                    } label: {
-                        HStack {
-                            if isTesting {
-                                ProgressView()
-                                    .controlSize(.small)
-                                Text("测试中...")
-                            } else {
-                                Label("测试连接", systemImage: testPassed ? "checkmark.circle.fill" : "bolt.horizontal")
+                    Section {
+                        Button {
+                            runTest()
+                        } label: {
+                            HStack {
+                                if isTesting {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                    Text("测试中...")
+                                } else {
+                                    Label("测试连接", systemImage: testPassed ? "checkmark.circle.fill" : "bolt.horizontal")
+                                }
                             }
                         }
-                    }
-                    .disabled(apiEndpoint.isEmpty || apiKey.isEmpty || modelName.isEmpty || isTesting)
+                        .disabled(apiEndpoint.isEmpty || apiKey.isEmpty || modelName.isEmpty || isTesting)
 
-                    if let result = testResult {
-                        Text(result)
-                            .font(.caption)
-                            .foregroundStyle(testPassed ? FHColors.success : FHColors.danger)
+                        if let result = testResult {
+                            Text(result)
+                                .font(.caption)
+                                .foregroundStyle(testPassed ? FHColors.success : FHColors.danger)
+                        }
+                    } footer: {
+                        Text("必须通过连接测试后才能保存模型")
+                            .font(.caption2)
                     }
-                } footer: {
-                    Text("必须通过连接测试后才能保存模型")
-                        .font(.caption2)
                 }
 
                 Section {
@@ -309,8 +327,13 @@ struct AddAIModelView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("保存") { save() }
-                        .disabled(!testPassed || name.isEmpty)
+                        .disabled(name.isEmpty || (!useBuiltIn && !testPassed))
                 }
+            }
+            .onAppear {
+                name = provider.displayName
+                apiEndpoint = provider.defaultEndpoint
+                modelName = provider.defaultModel
             }
         }
     }
@@ -341,15 +364,21 @@ struct AddAIModelView: View {
             for c in existingConfigs { c.isDefault = false }
         }
 
+        let isBI = useBuiltIn && provider != .custom
+        let endpoint = isBI ? AIModelConfig.proxyEndpoint : apiEndpoint
+
         let config = AIModelConfig(
             name: name,
             provider: provider,
-            apiEndpoint: apiEndpoint,
+            apiEndpoint: endpoint,
             modelName: modelName,
-            isDefault: shouldBeDefault
+            isDefault: shouldBeDefault,
+            isBuiltIn: isBI
         )
         context.insert(config)
-        try? KeychainManager.saveAPIKey(apiKey, for: config.id)
+        if !isBI {
+            try? KeychainManager.saveAPIKey(apiKey, for: config.id)
+        }
         try? context.save()
 
         dismiss()

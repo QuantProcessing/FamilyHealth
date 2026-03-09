@@ -212,11 +212,18 @@ struct AIChatView: View {
             return
         }
 
-        guard let apiKey = KeychainManager.getAPIKey(for: config.id) else {
-            alertType = .error
-            alertMessage = "未找到 API Key，请在设置 → AI 模型设置中重新配置"
-            showAlert = true
-            return
+        // Built-in proxy mode: no API key needed
+        let apiKey: String
+        if config.isBuiltIn {
+            apiKey = "builtin"
+        } else {
+            guard let key = KeychainManager.getAPIKey(for: config.id) else {
+                alertType = .error
+                alertMessage = "未找到 API Key，请在设置 → AI 模型设置中重新配置"
+                showAlert = true
+                return
+            }
+            apiKey = key
         }
 
         guard let userId = appState.currentUserId, let uuid = UUID(uuidString: userId) else {

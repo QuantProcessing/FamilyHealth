@@ -16,6 +16,12 @@ type Config struct {
 	APNsKeyFile    string
 	APNsKeyID      string
 	APNsTeamID     string
+	// AI provider API keys
+	DeepSeekAPIKey string
+	GLMAPIKey      string
+	KimiAPIKey     string
+	DoubaoAPIKey   string
+	QwenAPIKey     string
 }
 
 func Load() *Config {
@@ -31,6 +37,11 @@ func Load() *Config {
 		APNsKeyFile:    getEnv("APNS_KEY_FILE", ""),
 		APNsKeyID:      getEnv("APNS_KEY_ID", ""),
 		APNsTeamID:     getEnv("APNS_TEAM_ID", ""),
+		DeepSeekAPIKey: getEnv("DEEPSEEK_API_KEY", ""),
+		GLMAPIKey:      getEnv("GLM_API_KEY", ""),
+		KimiAPIKey:     getEnv("KIMI_API_KEY", ""),
+		DoubaoAPIKey:   getEnv("DOUBAO_API_KEY", ""),
+		QwenAPIKey:     getEnv("QWEN_API_KEY", ""),
 	}
 }
 

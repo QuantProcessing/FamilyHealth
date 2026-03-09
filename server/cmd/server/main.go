@@ -73,7 +73,7 @@ func main() {
 		Report: handler.NewReportHandler(services),
 		Case:   handler.NewCaseHandler(services),
 		Family: handler.NewFamilyHandler(services),
-		AI:     handler.NewAIHandler(services),
+		AI:     handler.NewAIHandler(services, cfg),
 	}
 
 	// Router
@@ -86,6 +86,10 @@ func main() {
 		auth := api.Group("/auth")
 		auth.POST("/sms-code", handlers.Auth.SendSMSCode)
 		auth.POST("/login", handlers.Auth.Login)
+
+		// AI Proxy (public — no JWT required)
+		ai := api.Group("/ai")
+		ai.POST("/proxy", handlers.AI.Proxy)
 
 		// Protected routes
 		protected := api.Group("")

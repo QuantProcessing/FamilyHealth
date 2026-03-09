@@ -1,10 +1,12 @@
 package handler
 
 import (
-	"io"
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"github.com/familyhealth/server/internal/config"
 	"github.com/familyhealth/server/internal/middleware"
 	"github.com/familyhealth/server/internal/model"
 	"github.com/familyhealth/server/internal/service"
@@ -317,36 +319,109 @@ func (h *FamilyHandler) MemberReports(c *gin.Context) {
 
 // ============ AI Handler ============
 
-type AIHandler struct{ svc *service.Services }
+type AIHandler struct {
+	svc *service.Services
+	cfg *config.Config
+}
 
-func NewAIHandler(svc *service.Services) *AIHandler { return &AIHandler{svc: svc} }
+func NewAIHandler(svc *service.Services, cfg *config.Config) *AIHandler {
+	return &AIHandler{svc: svc, cfg: cfg}
+}
 
-func (h *AIHandler) Chat(c *gin.Context) {
+// providerConfig maps provider name to (endpoint, apiKey)
+func (h *AIHandler) providerConfig(provider string) (endpoint, apiKey string, ok bool) {
+	switch provider {
+	case "deepseek":
+		return "https://api.deepseek.com/v1", h.cfg.DeepSeekAPIKey, h.cfg.DeepSeekAPIKey != ""
+	case "glm":
+		return "https://open.bigmodel.cn/api/paas/v4", h.cfg.GLMAPIKey, h.cfg.GLMAPIKey != ""
+	case "kimi":
+		return "https://api.moonshot.cn/v1", h.cfg.KimiAPIKey, h.cfg.KimiAPIKey != ""
+	case "doubao":
+		return "https://ark.cn-beijing.volces.com/api/v3", h.cfg.DoubaoAPIKey, h.cfg.DoubaoAPIKey != ""
+	case "qwen":
+		return "https://dashscope.aliyuncs.com/compatible-mode/v1", h.cfg.QwenAPIKey, h.cfg.QwenAPIKey != ""
+	default:
+		return "", "", false
+	}
+}
+
+// Proxy streams AI chat via SSE — POST /api/v1/ai/proxy
+func (h *AIHandler) Proxy(c *gin.Context) {
 	var req struct {
-		ConversationID *uuid.UUID `json:"conversation_id"`
-		Message        string     `json:"message" binding:"required"`
-		Model          string     `json:"model"`
-		APIEndpoint    string     `json:"api_endpoint" binding:"required"`
-		APIKey         string     `json:"api_key" binding:"required"`
+		Provider string `json:"provider" binding:"required"`
+		Model    string `json:"model" binding:"required"`
+		Messages []struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"messages" binding:"required"`
+		Stream bool `json:"stream"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Forward to user-specified AI endpoint (SSE proxy)
-	body := `{"model":"` + req.Model + `","messages":[{"role":"user","content":"` + req.Message + `"}],"stream":true}`
-	proxyReq, _ := http.NewRequest("POST", req.APIEndpoint+"/chat/completions", io.NopCloser(
-		io.Reader(nil), // simplified; real impl would use body
-	))
-	_ = body
-	_ = proxyReq
+	endpoint, apiKey, ok := h.providerConfig(req.Provider)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported or unconfigured provider: " + req.Provider})
+		return
+	}
 
-	// For now, return a placeholder
-	c.JSON(http.StatusOK, gin.H{
-		"message": "AI chat forwarding will use SSE streaming in production",
-		"status":  "ok",
+	// Build upstream request body
+	body, _ := json.Marshal(map[string]interface{}{
+		"model":    req.Model,
+		"messages": req.Messages,
+		"stream":   req.Stream,
 	})
+
+	upstreamURL := endpoint + "/chat/completions"
+	upReq, err := http.NewRequestWithContext(c.Request.Context(), "POST", upstreamURL, bytes.NewReader(body))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create upstream request"})
+		return
+	}
+	upReq.Header.Set("Content-Type", "application/json")
+	upReq.Header.Set("Authorization", "Bearer "+apiKey)
+
+	resp, err := http.DefaultClient.Do(upReq)
+	if err != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"error": "upstream request failed: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	if !req.Stream {
+		// Non-streaming: forward response as-is
+		c.DataFromReader(resp.StatusCode, resp.ContentLength, resp.Header.Get("Content-Type"), resp.Body, nil)
+		return
+	}
+
+	// Streaming: forward SSE
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Status(resp.StatusCode)
+
+	flusher, _ := c.Writer.(http.Flusher)
+	buf := make([]byte, 4096)
+	for {
+		n, readErr := resp.Body.Read(buf)
+		if n > 0 {
+			c.Writer.Write(buf[:n])
+			if flusher != nil {
+				flusher.Flush()
+			}
+		}
+		if readErr != nil {
+			break
+		}
+	}
+}
+
+func (h *AIHandler) Chat(c *gin.Context) {
+	// Legacy endpoint — redirect to Proxy
+	c.JSON(http.StatusOK, gin.H{"message": "Use POST /api/v1/ai/proxy instead"})
 }
 
 func (h *AIHandler) AnalyzeReport(c *gin.Context) {
@@ -356,8 +431,8 @@ func (h *AIHandler) AnalyzeReport(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "report not found"})
 		return
 	}
-	_ = report // TODO: call AI API for analysis
-	c.JSON(http.StatusOK, gin.H{"analysis": "AI report analysis coming in M6"})
+	_ = report
+	c.JSON(http.StatusOK, gin.H{"analysis": "Use POST /api/v1/ai/proxy for analysis"})
 }
 
 func (h *AIHandler) ListConversations(c *gin.Context) {

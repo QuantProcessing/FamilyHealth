@@ -9,6 +9,7 @@ final class AIModelConfig {
     var apiEndpoint: String
     var modelName: String
     var isDefault: Bool
+    var isBuiltIn: Bool
     var createdAt: Date
     var updatedAt: Date
 
@@ -24,7 +25,8 @@ final class AIModelConfig {
         provider: Provider,
         apiEndpoint: String,
         modelName: String,
-        isDefault: Bool = false
+        isDefault: Bool = false,
+        isBuiltIn: Bool = false
     ) {
         self.id = id
         self.name = name
@@ -32,25 +34,64 @@ final class AIModelConfig {
         self.apiEndpoint = apiEndpoint
         self.modelName = modelName
         self.isDefault = isDefault
+        self.isBuiltIn = isBuiltIn
         self.createdAt = Date()
         self.updatedAt = Date()
     }
 
     enum Provider: String, Codable, CaseIterable {
-        case openai
-        case claude
-        case gemini
-        case ollama
+        case deepseek
+        case glm
+        case kimi
+        case doubao
+        case qwen
         case custom
 
         var displayName: String {
             switch self {
-            case .openai: return "OpenAI"
-            case .claude: return "Claude"
-            case .gemini: return "Gemini"
-            case .ollama: return "Ollama"
-            case .custom: return String(localized: "自定义")
+            case .deepseek: return "DeepSeek"
+            case .glm: return "智谱 GLM"
+            case .kimi: return "Kimi (月之暗面)"
+            case .doubao: return "豆包 (字节)"
+            case .qwen: return "通义千问"
+            case .custom: return "自定义"
+            }
+        }
+
+        var defaultEndpoint: String {
+            switch self {
+            case .deepseek: return "https://api.deepseek.com/v1"
+            case .glm: return "https://open.bigmodel.cn/api/paas/v4"
+            case .kimi: return "https://api.moonshot.cn/v1"
+            case .doubao: return "https://ark.cn-beijing.volces.com/api/v3"
+            case .qwen: return "https://dashscope.aliyuncs.com/compatible-mode/v1"
+            case .custom: return ""
+            }
+        }
+
+        var defaultModel: String {
+            switch self {
+            case .deepseek: return "deepseek-chat"
+            case .glm: return "glm-4-flash"
+            case .kimi: return "moonshot-v1-8k"
+            case .doubao: return "doubao-1.5-pro-32k-250115"
+            case .qwen: return "qwen-plus"
+            case .custom: return ""
+            }
+        }
+
+        var iconName: String {
+            switch self {
+            case .deepseek: return "brain.head.profile"
+            case .glm: return "sparkles"
+            case .kimi: return "moon.stars"
+            case .doubao: return "bubble.left.and.text.bubble.right"
+            case .qwen: return "cloud.bolt"
+            case .custom: return "wrench.and.screwdriver"
             }
         }
     }
+
+    /// Proxy endpoint served by the FamilyHealth backend
+    static let proxyEndpoint = "http://localhost:8080/api/v1/ai/proxy"
 }
