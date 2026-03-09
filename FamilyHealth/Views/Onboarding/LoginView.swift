@@ -6,10 +6,8 @@ struct LoginView: View {
     @State private var phone = ""
     @State private var name = ""
     @State private var gender: User.Gender = .male
-    @State private var showProfileSetup = false
     @State private var errorMessage: String?
     @State private var logoBreathing = false
-    @State private var contentAppeared = false
 
     var body: some View {
         NavigationStack {
@@ -38,7 +36,7 @@ struct LoginView: View {
                     }
                     .fhStaggerEntrance(index: 0)
 
-                    // Phone input
+                    // User info input
                     VStack(spacing: FHSpacing.lg) {
                         HStack {
                             Text("+86")
@@ -53,43 +51,28 @@ struct LoginView: View {
                                 .textFieldStyle(.roundedBorder)
                         }
 
-                        if appState.mode == .local {
-                            TextField("您的姓名", text: $name)
-                                .textFieldStyle(.roundedBorder)
+                        TextField("您的姓名", text: $name)
+                            .textFieldStyle(.roundedBorder)
 
-                            Picker("性别", selection: $gender) {
-                                ForEach(User.Gender.allCases, id: \.self) { g in
-                                    Text(g.displayName).tag(g)
-                                }
+                        Picker("性别", selection: $gender) {
+                            ForEach(User.Gender.allCases, id: \.self) { g in
+                                Text(g.displayName).tag(g)
                             }
-                            .pickerStyle(.segmented)
                         }
+                        .pickerStyle(.segmented)
                     }
                     .padding(.horizontal, FHSpacing.xxl)
                     .fhStaggerEntrance(index: 1)
 
-                    // Mode selector with spring bounce
+                    // Description
                     VStack(spacing: FHSpacing.sm) {
-                        Text("运行模式")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        HStack(spacing: FHSpacing.md) {
-                            ModeCard(
-                                icon: "iphone",
-                                title: "本地模式",
-                                subtitle: "无需联网，数据保存在本地",
-                                isSelected: appState.mode == .local
-                            ) { appState.mode = .local }
-
-                            ModeCard(
-                                icon: "cloud",
-                                title: "联网模式",
-                                subtitle: "数据同步至云端，随时访问",
-                                isSelected: appState.mode == .remote
-                            ) { appState.mode = .remote }
+                        HStack(spacing: FHSpacing.sm) {
+                            Image(systemName: "lock.shield")
+                                .foregroundStyle(FHColors.success)
+                            Text("所有数据安全存储在您的设备上")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .padding(.horizontal, FHSpacing.xxl)
                     }
                     .fhStaggerEntrance(index: 2)
 
@@ -102,16 +85,16 @@ struct LoginView: View {
 
                     Spacer()
 
-                    // Login button with gradient
+                    // Login button
                     Button {
                         Task { await login() }
                     } label: {
-                        Text(appState.mode == .local ? "创建本地账户" : "获取验证码")
+                        Text("创建账户")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(
-                                (phone.isEmpty || (appState.mode == .local && name.isEmpty))
+                                (phone.isEmpty || name.isEmpty)
                                     ? AnyShapeStyle(Color.gray.opacity(0.4))
                                     : AnyShapeStyle(FHGradients.accentButton)
                             )
@@ -119,7 +102,7 @@ struct LoginView: View {
                             .clipShape(RoundedRectangle(cornerRadius: FHRadius.large))
                             .fhShadow(.medium)
                     }
-                    .disabled(phone.isEmpty || (appState.mode == .local && name.isEmpty))
+                    .disabled(phone.isEmpty || name.isEmpty)
                     .fhPressStyle()
                     .padding(.horizontal, FHSpacing.xxl)
                     .padding(.bottom, FHSpacing.xxxl)
@@ -136,14 +119,10 @@ struct LoginView: View {
 
     private func login() async {
         do {
-            if appState.mode == .local {
-                let user = try await services.authService.createLocalUser(
-                    phone: phone, name: name, gender: gender
-                )
-                appState.currentUserId = user.id.uuidString
-            } else {
-                errorMessage = "联网模式登录暂未实现"
-            }
+            let user = try await services.authService.createLocalUser(
+                phone: phone, name: name, gender: gender
+            )
+            appState.currentUserId = user.id.uuidString
         } catch {
             errorMessage = error.localizedDescription
         }

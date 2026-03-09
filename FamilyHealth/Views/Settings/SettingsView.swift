@@ -36,7 +36,7 @@ struct SettingsView: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
-                                Text(appState.mode.displayName)
+                                Text(appState.isLoggedIn ? "已登录" : "")
                                     .font(.caption)
                                     .padding(.horizontal, FHSpacing.sm)
                                     .padding(.vertical, 2)
@@ -57,11 +57,6 @@ struct SettingsView: View {
                         Label("个人资料", systemImage: "person.circle")
                     }
 
-                    NavigationLink {
-                        ModeSettingsView()
-                    } label: {
-                        Label("运行模式", systemImage: "globe")
-                    }
                 }
 
                 // AI Config
@@ -128,161 +123,6 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Mode Settings
-struct ModeSettingsView: View {
-    @EnvironmentObject private var appState: AppState
-    @Environment(ServiceContainer.self) private var services
-    @State private var serverURL = ""
-    @State private var syncLocalData = false
-    @State private var connectionStatus: ConnectionStatus = .idle
-    @State private var showSwitchAlert = false
-
-    enum ConnectionStatus: Equatable {
-        case idle, testing, success, failed(String)
-    }
-
-    var body: some View {
-        List {
-            Section {
-                HStack {
-                    Image(systemName: appState.mode == .local ? "iphone" : "cloud")
-                        .font(.title2)
-                        .foregroundStyle(appState.mode == .local ? FHColors.primary : FHColors.success)
-                    VStack(alignment: .leading) {
-                        Text("当前：\(appState.mode.displayName)")
-                            .font(.headline)
-                        Text(appState.mode == .local ?
-                             "所有数据存储在设备本地，无需联网" :
-                             "数据同步至 \(appState.serverURL)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-
-            if appState.mode == .local {
-                Section("切换到联网模式") {
-                    HStack {
-                        Image(systemName: "link")
-                            .foregroundStyle(.secondary)
-                        TextField("http://localhost:8080", text: $serverURL)
-                            .keyboardType(.URL)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                    }
-
-                    Button {
-                        testConnection()
-                    } label: {
-                        HStack {
-                            if connectionStatus == .testing {
-                                ProgressView()
-                                    .controlSize(.small)
-                                Text("测试中...")
-                            } else {
-                                Image(systemName: "antenna.radiowaves.left.and.right")
-                                Text("测试连接")
-                            }
-                            Spacer()
-                            switch connectionStatus {
-                            case .success:
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(FHColors.success)
-                            case .failed:
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(FHColors.danger)
-                            default:
-                                EmptyView()
-                            }
-                        }
-                    }
-                    .disabled(serverURL.isEmpty || connectionStatus == .testing)
-
-                    if case .failed(let msg) = connectionStatus {
-                        Text(msg)
-                            .font(.caption)
-                            .foregroundStyle(FHColors.danger)
-                    }
-
-                    if case .success = connectionStatus {
-                        Text("✅ 连接成功！服务器状态正常")
-                            .font(.caption)
-                            .foregroundStyle(FHColors.success)
-                    }
-                }
-
-                Section {
-                    Button("确认切换到联网模式") {
-                        showSwitchAlert = true
-                    }
-                    .disabled(connectionStatus != .success)
-                } footer: {
-                    Text("切换后，新数据将通过服务器存储和同步")
-                }
-            } else {
-                Section("当前连接") {
-                    HStack {
-                        Text("服务器地址")
-                        Spacer()
-                        Text(appState.serverURL)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                    }
-                }
-
-                Section {
-                    Button("切换到本地模式") {
-                        appState.mode = .local
-                        services.rebuildServices()
-                    }
-                } footer: {
-                    Text("切换后，数据将仅存储在本地设备")
-                }
-            }
-        }
-        .navigationTitle("运行模式")
-        .onAppear {
-            serverURL = appState.serverURL.isEmpty ? "http://localhost:8080" : appState.serverURL
-        }
-        .alert("确认切换", isPresented: $showSwitchAlert) {
-            Button("取消", role: .cancel) {}
-            Button("确认切换") {
-                appState.serverURL = serverURL
-                appState.mode = .remote
-                services.rebuildServices()
-            }
-        } message: {
-            Text("将切换到联网模式，数据将通过服务器 \(serverURL) 存储")
-        }
-    }
-
-    private func testConnection() {
-        connectionStatus = .testing
-        let urlStr = serverURL.hasSuffix("/") ? serverURL + "health" : serverURL + "/health"
-        guard let url = URL(string: urlStr) else {
-            connectionStatus = .failed("无效的 URL")
-            return
-        }
-        Task {
-            do {
-                let (data, response) = try await URLSession.shared.data(from: url)
-                guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                    connectionStatus = .failed("服务器返回错误")
-                    return
-                }
-                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   json["status"] as? String == "ok" {
-                    connectionStatus = .success
-                } else {
-                    connectionStatus = .failed("非 FamilyHealth 服务器")
-                }
-            } catch {
-                connectionStatus = .failed("连接失败: \(error.localizedDescription)")
-            }
-        }
-    }
-}
 
 // MARK: - AI Model Settings
 struct AIModelSettingsView: View {

@@ -1,11 +1,10 @@
 import SwiftUI
 import SwiftData
 
-/// Dependency injection container that switches between local and remote service implementations.
+/// Dependency injection container — always uses local (SwiftData) service implementations.
 @MainActor @Observable
 class ServiceContainer {
     let appState: AppState
-    private var apiClient: APIClient?
     private var _modelContext: ModelContext?
 
     // Service instances — initially stubs, replaced when configure() is called
@@ -20,26 +19,11 @@ class ServiceContainer {
 
     func configure(modelContext: ModelContext) {
         self._modelContext = modelContext
-        rebuildServices()
-    }
-
-    func rebuildServices() {
-        switch appState.mode {
-        case .local:
-            guard let ctx = _modelContext else { return }
-            authService = LocalAuthService(context: ctx)
-            reportService = LocalReportService(context: ctx)
-            caseService = LocalCaseService(context: ctx)
-            familyService = LocalFamilyService(context: ctx)
-        case .remote:
-            let url = appState.serverURL.isEmpty ? "http://localhost:8080" : appState.serverURL
-            let api = APIClient(baseURL: url)
-            self.apiClient = api
-            authService = RemoteAuthService(api: api)
-            reportService = RemoteReportService(api: api)
-            caseService = RemoteCaseService(api: api)
-            familyService = RemoteFamilyService(api: api)
-        }
+        guard let ctx = _modelContext else { return }
+        authService = LocalAuthService(context: ctx)
+        reportService = LocalReportService(context: ctx)
+        caseService = LocalCaseService(context: ctx)
+        familyService = LocalFamilyService(context: ctx)
     }
 }
 

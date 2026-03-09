@@ -54,12 +54,6 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: FHSpacing.xs) {
                 Text(greeting)
                     .font(.title.bold())
-                Text(appState.mode.displayName)
-                    .font(.caption)
-                    .padding(.horizontal, FHSpacing.sm)
-                    .padding(.vertical, 2)
-                    .background(.white.opacity(0.2))
-                    .clipShape(Capsule())
             }
             Spacer()
             Circle()
