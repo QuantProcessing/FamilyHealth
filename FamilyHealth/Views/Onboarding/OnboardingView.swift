@@ -32,7 +32,7 @@ struct OnboardingView: View {
                         if currentPage < pages.count - 1 {
                             currentPage += 1
                         } else {
-                            // Onboarding no longer used — app opens directly
+                            appState.hasCompletedOnboarding = true
                         }
                     }
                 } label: {

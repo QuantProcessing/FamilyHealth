@@ -41,7 +41,7 @@ struct AIChatView: View {
                     }
                     Text("需要配置 AI 模型")
                         .font(.title3.bold())
-                    Text("请在设置中添加 API 地址和 API Key\n支持 OpenAI、Gemini、Ollama 等兼容接口")
+                    Text("请在设置中添加 API 配置\n支持 DeepSeek、智谱 GLM、Kimi 等模型")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -58,6 +58,11 @@ struct AIChatView: View {
 
     private var chatContent: some View {
         VStack(spacing: 0) {
+            // Model info banner
+            if let config = defaultConfig {
+                modelInfoBanner(config: config)
+            }
+
             // Messages
             ScrollViewReader { proxy in
                 ScrollView {
@@ -166,6 +171,39 @@ struct AIChatView: View {
         }
     }
 
+    // MARK: - Model Info Banner
+
+    private func modelInfoBanner(config: AIModelConfig) -> some View {
+        HStack(spacing: FHSpacing.sm) {
+            Image(systemName: config.provider.iconName)
+                .font(.caption)
+                .foregroundStyle(FHColors.aiPurple)
+
+            Text(config.provider.displayName)
+                .font(.caption.bold())
+
+            Text(config.modelName)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+
+            if config.isBuiltIn {
+                Text("免费")
+                    .font(.caption2.bold())
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(FHColors.success.opacity(0.15))
+                    .foregroundStyle(FHColors.success)
+                    .clipShape(Capsule())
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, FHSpacing.lg)
+        .padding(.vertical, FHSpacing.sm)
+        .background(FHColors.subtleGray.opacity(0.5))
+    }
+
     // MARK: - Input Bar
 
     private var inputBar: some View {
@@ -212,18 +250,12 @@ struct AIChatView: View {
             return
         }
 
-        // Built-in proxy mode: no API key needed
-        let apiKey: String
-        if config.isBuiltIn {
-            apiKey = "builtin"
-        } else {
-            guard let key = KeychainManager.getAPIKey(for: config.id) else {
-                alertType = .error
-                alertMessage = "未找到 API Key，请在设置 → AI 模型设置中重新配置"
-                showAlert = true
-                return
-            }
-            apiKey = key
+        // Get API key from Keychain (works for both built-in and custom configs)
+        guard let apiKey = KeychainManager.getAPIKey(for: config.id) else {
+            alertType = .error
+            alertMessage = "未找到 API Key，请在设置 → AI 模型设置中重新配置"
+            showAlert = true
+            return
         }
 
         guard let userId = appState.currentUserId, let uuid = UUID(uuidString: userId) else {

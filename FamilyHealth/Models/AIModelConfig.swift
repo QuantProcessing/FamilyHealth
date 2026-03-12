@@ -14,7 +14,6 @@ final class AIModelConfig {
     var updatedAt: Date
 
     /// API Key is stored in Keychain, not in SwiftData.
-    /// Use KeychainManager.getAPIKey(configId:) to retrieve.
     var keychainKeyId: String {
         "ai_api_key_\(id.uuidString)"
     }
@@ -40,6 +39,7 @@ final class AIModelConfig {
     }
 
     enum Provider: String, Codable, CaseIterable {
+        case siliconflow
         case deepseek
         case glm
         case kimi
@@ -49,6 +49,7 @@ final class AIModelConfig {
 
         var displayName: String {
             switch self {
+            case .siliconflow: return "硅基流动"
             case .deepseek: return "DeepSeek"
             case .glm: return "智谱 GLM"
             case .kimi: return "Kimi (月之暗面)"
@@ -60,6 +61,7 @@ final class AIModelConfig {
 
         var defaultEndpoint: String {
             switch self {
+            case .siliconflow: return "https://api.siliconflow.cn/v1"
             case .deepseek: return "https://api.deepseek.com/v1"
             case .glm: return "https://open.bigmodel.cn/api/paas/v4"
             case .kimi: return "https://api.moonshot.cn/v1"
@@ -71,6 +73,7 @@ final class AIModelConfig {
 
         var defaultModel: String {
             switch self {
+            case .siliconflow: return "internlm/internlm2_5-7b-chat"
             case .deepseek: return "deepseek-chat"
             case .glm: return "glm-4-flash"
             case .kimi: return "moonshot-v1-8k"
@@ -82,6 +85,7 @@ final class AIModelConfig {
 
         var iconName: String {
             switch self {
+            case .siliconflow: return "bolt.circle.fill"
             case .deepseek: return "brain.head.profile"
             case .glm: return "sparkles"
             case .kimi: return "moon.stars"
@@ -91,6 +95,9 @@ final class AIModelConfig {
             }
         }
     }
+
+    /// Built-in free API key (SiliconFlow)
+    static let builtInAPIKey = "sk-gwfvvoogqemgpipnhyitauiaineagwiefyvwuplbclicdagr"
 
     /// Proxy endpoint served by the FamilyHealth backend
     static let proxyEndpoint = "http://localhost:8080/api/v1/ai/proxy"

@@ -40,17 +40,11 @@ final class AIChatViewModel {
     ) {
         guard let ctx = context else { return }
 
-        let apiKey: String
-        if config.isBuiltIn {
-            apiKey = "builtin"
-        } else {
-            guard let key = KeychainManager.getAPIKey(for: config.id) else {
-                alertType = .error
-                alertMessage = AIError.noAPIKey.localizedDescription
-                showAlert = true
-                return
-            }
-            apiKey = key
+        guard let apiKey = KeychainManager.getAPIKey(for: config.id) else {
+            alertType = .error
+            alertMessage = AIError.noAPIKey.localizedDescription
+            showAlert = true
+            return
         }
 
         // Ensure conversation exists
