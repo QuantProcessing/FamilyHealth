@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var showUploadReport = false
     @State private var showAddCase = false
     @State private var showAIChat = false
+    @State private var showHealthData = false
 
 
     var body: some View {
@@ -45,6 +46,16 @@ struct HomeView: View {
             }
 
             .sheet(isPresented: $showAddCase) { AddCaseView() }
+            .sheet(isPresented: $showHealthData) {
+                NavigationStack {
+                    HealthDataSheetView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("关闭") { showHealthData = false }
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -204,6 +215,9 @@ struct HomeView: View {
                 QuickActionButton(icon: "brain.head.profile", title: "AI 对话", color: FHColors.aiPurple) {
                     showAIChat = true
                 }
+                QuickActionButton(icon: "heart.text.square", title: "健康数据", color: .red) {
+                    showHealthData = true
+                }
 
             }
         }
@@ -346,5 +360,123 @@ struct RecentRecordRow: View {
         .background(FHColors.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: FHRadius.medium))
         .fhShadow(.light)
+    }
+}
+
+// MARK: - Health Data Sheet
+
+struct HealthDataSheetView: View {
+    @Query(sort: \HealthKitRecord.date, order: .reverse) private var records: [HealthKitRecord]
+    @State private var isSyncing = false
+    @State private var syncEnabled = HealthKitService.shared.isSyncEnabled
+
+    private var groupedRecords: [(String, String, Color, [HealthKitRecord])] {
+        let order: [(String, String, Color)] = [
+            ("steps", "figure.walk", .green),
+            ("heartRate", "heart.fill", .red),
+            ("sleep", "bed.double.fill", .indigo),
+            ("bloodOxygen", "lungs.fill", .blue),
+            ("weight", "scalemass", .orange),
+            ("activeEnergy", "flame.fill", .pink),
+            ("bloodPressureSystolic", "waveform.path.ecg", .purple),
+            ("bloodPressureDiastolic", "waveform.path.ecg", .purple),
+        ]
+        let byCategory = Dictionary(grouping: records) { $0.category }
+        return order.compactMap { cat, icon, color in
+            guard let items = byCategory[cat], !items.isEmpty else { return nil }
+            return (items.first!.categoryDisplayName, icon, color, items)
+        }
+    }
+
+    var body: some View {
+        List {
+            // Sync control
+            Section {
+                Toggle(isOn: $syncEnabled) {
+                    Label("同步 Apple 健康数据", systemImage: "heart.text.square")
+                }
+                .onChange(of: syncEnabled) { _, newValue in
+                    HealthKitService.shared.isSyncEnabled = newValue
+                    if newValue { syncNow() }
+                }
+
+                Button {
+                    syncNow()
+                } label: {
+                    HStack {
+                        Label("立即同步", systemImage: "arrow.triangle.2.circlepath")
+                        Spacer()
+                        if isSyncing {
+                            ProgressView().controlSize(.small)
+                        }
+                    }
+                }
+                .disabled(isSyncing || !syncEnabled)
+            } footer: {
+                if let date = HealthKitService.shared.lastSyncDate {
+                    Text("上次同步: \(date.formatted(date: .abbreviated, time: .shortened))")
+                }
+            }
+
+            // Data preview
+            if records.isEmpty && syncEnabled {
+                Section {
+                    ContentUnavailableView(
+                        "暂无数据",
+                        systemImage: "heart.slash",
+                        description: Text("点击「立即同步」获取健康数据")
+                    )
+                }
+            }
+
+            ForEach(groupedRecords, id: \.0) { name, icon, color, items in
+                Section {
+                    ForEach(items.prefix(7)) { record in
+                        HStack {
+                            Image(systemName: icon)
+                                .font(.caption)
+                                .foregroundStyle(color)
+                                .frame(width: 24)
+                            Text(record.date, format: .dateTime.month().day().weekday())
+                                .font(.subheadline)
+                            Spacer()
+                            Text(formatValue(record))
+                                .font(.subheadline.bold())
+                                .foregroundStyle(color)
+                        }
+                    }
+                } header: {
+                    Text(name)
+                }
+            }
+        }
+        .navigationTitle("健康数据")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func syncNow() {
+        isSyncing = true
+        Task {
+            do {
+                try await HealthKitService.shared.requestAuthorization()
+                try await HealthKitService.shared.syncRecentData()
+            } catch {}
+            isSyncing = false
+        }
+    }
+
+    private func formatValue(_ record: HealthKitRecord) -> String {
+        let v = record.value
+        switch record.category {
+        case "steps", "activeEnergy":
+            return "\(Int(v)) \(record.unit)"
+        case "sleep":
+            return String(format: "%.1f \(record.unit)", v)
+        case "bloodOxygen":
+            return String(format: "%.0f%%", v)
+        default:
+            if v == v.rounded() { return "\(Int(v)) \(record.unit)" }
+            return String(format: "%.1f \(record.unit)", v)
+        }
     }
 }
