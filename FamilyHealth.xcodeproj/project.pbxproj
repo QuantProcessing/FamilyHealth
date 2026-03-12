@@ -12,6 +12,8 @@
 		0A6197B55BBB28866131E1B4 /* SWAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED2F08D042ACC666E07A5B8 /* SWAlert.swift */; };
 		1832288F069F7594E32D6D7F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBC2586C409B2DD947A44306 /* User.swift */; };
 		1C202837C385CDEEE3F807B4 /* HealthReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90DB2B8F3E97FC035B32BD75 /* HealthReport.swift */; };
+		AACC001122334455FFEE0002 /* HealthKitRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACC001122334455FFEE0001 /* HealthKitRecord.swift */; };
+		AACC001122334455FFEE0004 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACC001122334455FFEE0003 /* HealthKitService.swift */; };
 		24DFED3FF107C215C3C0233B /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49CFAF31F4FE6BD02E444BB /* ServiceContainer.swift */; };
 		297039BB193274A163A92ED7 /* MedicalCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FAFFC15CA55EB9A6AA042E /* MedicalCase.swift */; };
 		2A93E43B98E20581B729C902 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FAFF411A24D61DB139F53 /* RootView.swift */; };
@@ -81,6 +83,7 @@
 		6B64F9AB652E60C68860F99F /* FamilyGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FamilyGroup.swift; sourceTree = "<group>"; };
 		737D625C85C187AA720CADEA /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		769E649837AB088F6097DFD7 /* LocalAIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAIService.swift; sourceTree = "<group>"; };
+		AACC001122334455FFEE0003 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		7B6088B4FB02E8AD09FB5D03 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		7EC256FE648C88F748577CD6 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		81CD507F611063A1FD0E7285 /* SWStepper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWStepper.swift; sourceTree = "<group>"; };
@@ -91,6 +94,7 @@
 		8B2AE8E53BC69C94620A5BE3 /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
 		8E374ED52155D0E527C9BC21 /* LocalAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAuthService.swift; sourceTree = "<group>"; };
 		90DB2B8F3E97FC035B32BD75 /* HealthReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthReport.swift; sourceTree = "<group>"; };
+		AACC001122334455FFEE0001 /* HealthKitRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitRecord.swift; sourceTree = "<group>"; };
 		981CFA5ACF871A3DA9E9D1CC /* AIChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
 		99C31FBD5AB3ABB6DAA26023 /* ServiceProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceProtocols.swift; sourceTree = "<group>"; };
 		A6D0EA8BE9FC1389B6D41D81 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -134,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				769E649837AB088F6097DFD7 /* LocalAIService.swift */,
+				AACC001122334455FFEE0003 /* HealthKitService.swift */,
 				E40CB71E9B1A070E23B60196 /* OpenAIClient.swift */,
 			);
 			path = AI;
@@ -224,6 +229,7 @@
 				E4538966094192A67E6AFC4C /* ChatConversation.swift */,
 				6B64F9AB652E60C68860F99F /* FamilyGroup.swift */,
 				90DB2B8F3E97FC035B32BD75 /* HealthReport.swift */,
+				AACC001122334455FFEE0001 /* HealthKitRecord.swift */,
 				59FAFFC15CA55EB9A6AA042E /* MedicalCase.swift */,
 				EBC2586C409B2DD947A44306 /* User.swift */,
 			);
@@ -416,6 +422,8 @@
 				DD7C1362E363DAB760B5E23D /* FamilyHealthApp.swift in Sources */,
 				AE94965B245AD6BA496055AE /* FamilyListView.swift in Sources */,
 				1C202837C385CDEEE3F807B4 /* HealthReport.swift in Sources */,
+				AACC001122334455FFEE0002 /* HealthKitRecord.swift in Sources */,
+				AACC001122334455FFEE0004 /* HealthKitService.swift in Sources */,
 				67C8851DCB6A88D49380AC90 /* HomeView.swift in Sources */,
 				057927F4DD8B9EAA56287A11 /* HomeViewModel.swift in Sources */,
 				856A2911A6F0F01D272C9A9A /* KeychainManager.swift in Sources */,

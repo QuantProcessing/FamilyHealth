@@ -146,6 +146,13 @@ final class LocalAIService: AIServiceProtocol {
             }
         }
 
+        // 4. Always include recent HealthKit data if available
+        let healthRecords = try fetchRecentHealthKitData()
+        if !healthRecords.isEmpty {
+            parts.append("### Apple 健康数据（最近7天）")
+            parts += healthRecords.map { $0.summary }
+        }
+
         return parts.isEmpty ? "暂无相关健康数据" : parts.joined(separator: "\n\n")
     }
 
@@ -277,6 +284,14 @@ final class LocalAIService: AIServiceProtocol {
             sortBy: [SortDescriptor(\.visitDate, order: .reverse)]
         )
         descriptor.fetchLimit = limit
+        return try context.fetch(descriptor)
+    }
+
+    private func fetchRecentHealthKitData() throws -> [HealthKitRecord] {
+        var descriptor = FetchDescriptor<HealthKitRecord>(
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = 50
         return try context.fetch(descriptor)
     }
 

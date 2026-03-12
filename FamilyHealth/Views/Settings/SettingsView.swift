@@ -84,6 +84,45 @@ struct SettingsView: View {
                     }
                 }
 
+                // HealthKit
+                Section("健康数据") {
+                    Toggle(isOn: Binding(
+                        get: { HealthKitService.shared.isSyncEnabled },
+                        set: { newValue in
+                            HealthKitService.shared.isSyncEnabled = newValue
+                            if newValue {
+                                Task {
+                                    try? await HealthKitService.shared.requestAuthorization()
+                                    try? await HealthKitService.shared.syncRecentData()
+                                }
+                            }
+                        }
+                    )) {
+                        Label("同步 Apple 健康数据", systemImage: "heart.text.square")
+                    }
+                    .disabled(!HealthKitService.shared.isAvailable)
+
+                    if HealthKitService.shared.isSyncEnabled {
+                        if let lastSync = HealthKitService.shared.lastSyncDate {
+                            HStack {
+                                Text("上次同步")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(lastSync.formatted(date: .abbreviated, time: .shortened))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        Button {
+                            Task { try? await HealthKitService.shared.syncRecentData() }
+                        } label: {
+                            Label("立即同步", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                }
+
                 // About
                 Section("关于") {
                     HStack {

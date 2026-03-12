@@ -25,6 +25,7 @@ struct FamilyHealthApp: App {
                 AIModelConfig.self,
                 ChatConversation.self,
                 ChatMessage.self,
+                HealthKitRecord.self,
             ])
             let config = ModelConfiguration(
                 schema: schema,
@@ -39,6 +40,9 @@ struct FamilyHealthApp: App {
         // Create single shared ServiceContainer
         serviceContainer = ServiceContainer(appState: appState)
         serviceContainer.configure(modelContext: modelContainer.mainContext)
+
+        // Configure HealthKit service
+        HealthKitService.shared.configure(modelContext: modelContainer.mainContext)
     }
 
     var body: some Scene {
