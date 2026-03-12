@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class HealthKitRecord: @unchecked Sendable {
+final class HealthKitRecord {
     var id: UUID
     var date: Date
     var category: String    // "steps" / "heartRate" / "bloodOxygen" / "bloodPressure" / "weight" / "sleep" / "activeEnergy"

@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - Auth Service
+@MainActor
 protocol AuthService {
     func createLocalUser(phone: String, name: String, gender: User.Gender) async throws -> User
     func getCurrentUser() async throws -> User?
@@ -10,6 +11,7 @@ protocol AuthService {
 }
 
 // MARK: - Report Service
+@MainActor
 protocol ReportService {
     func createReport(_ report: HealthReport) async throws
     func fetchReports(userId: UUID) async throws -> [HealthReport]
@@ -20,6 +22,7 @@ protocol ReportService {
 }
 
 // MARK: - Case Service
+@MainActor
 protocol CaseService {
     func createCase(_ medicalCase: MedicalCase) async throws
     func fetchCases(userId: UUID) async throws -> [MedicalCase]
@@ -30,6 +33,7 @@ protocol CaseService {
 }
 
 // MARK: - Family Service
+@MainActor
 protocol FamilyService {
     func createGroup(name: String, creatorId: UUID) async throws -> FamilyGroup
     func fetchGroups(userId: UUID) async throws -> [FamilyGroup]
@@ -44,6 +48,7 @@ protocol FamilyService {
 }
 
 // MARK: - AI Service
+@MainActor
 protocol AIServiceProtocol {
     func chat(
         messages: [ChatMessage],
