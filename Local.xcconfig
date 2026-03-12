@@ -1,5 +1,0 @@
-// Local mode — no server dependency
-// All data stored locally, no built-in AI proxy
-
-SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited)
-SERVER_URL =

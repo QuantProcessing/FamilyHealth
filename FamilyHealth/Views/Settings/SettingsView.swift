@@ -241,7 +241,7 @@ struct AddAIModelView: View {
     @State private var apiKey = ""
     @State private var modelName = ""
     @State private var isDefault = false
-    @State private var useBuiltIn = BuildConfig.isServerMode
+    @State private var useBuiltIn = false
     @State private var testResult: String?
     @State private var testPassed = false
     @State private var isTesting = false
@@ -266,7 +266,7 @@ struct AddAIModelView: View {
                     TextField("配置名称", text: $name)
                 }
 
-                if BuildConfig.isServerMode && provider != .custom {
+                if provider != .custom {
                     Section {
                         Toggle("使用内置代理（免费）", isOn: $useBuiltIn)
                     } footer: {
