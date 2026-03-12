@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class HealthReport {
+final class HealthReport: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var uploaderId: UUID
@@ -58,7 +58,7 @@ final class HealthReport {
 }
 
 @Model
-final class ReportFile {
+final class ReportFile: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var fileType: FileType
     var localPath: String

@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class AIModelConfig {
+final class AIModelConfig: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var name: String
     var provider: Provider

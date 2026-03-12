@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class FamilyGroup {
+final class FamilyGroup: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var name: String
     var creatorId: UUID
@@ -26,7 +26,7 @@ final class FamilyGroup {
 }
 
 @Model
-final class FamilyMember {
+final class FamilyMember: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var role: Role

@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class MedicalCase {
+final class MedicalCase: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var uploaderId: UUID
@@ -50,7 +50,7 @@ final class MedicalCase {
 }
 
 @Model
-final class Medication {
+final class Medication: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var name: String
     var dosage: String?
@@ -77,7 +77,7 @@ final class Medication {
 }
 
 @Model
-final class CaseAttachment {
+final class CaseAttachment: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var fileType: String
     var localPath: String

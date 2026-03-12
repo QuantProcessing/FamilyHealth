@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class ChatConversation {
+final class ChatConversation: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var title: String?
@@ -29,7 +29,7 @@ final class ChatConversation {
 }
 
 @Model
-final class ChatMessage {
+final class ChatMessage: @unchecked Sendable {
     @Attribute(.unique) var id: UUID
     var role: MessageRole
     var content: String
