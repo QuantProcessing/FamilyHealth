@@ -4,5 +4,21 @@
 <dict>
 	<key>NSHealthShareUsageDescription</key>
 	<string>FamilyHealth 需要读取您的健康数据（步数、心率、血氧、血压、体重、睡眠等），以便 AI 结合您的实时健康指标给出个性化建议。</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>FamilyHealth 可能需要写入健康数据以记录您的健康指标。</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
 </dict>
 </plist>
