@@ -12,14 +12,8 @@ final class AppState: ObservableObject {
         didSet { UserDefaults.standard.set(currentUserId, forKey: "current_user_id") }
     }
 
-    var isLoggedIn: Bool { currentUserId != nil }
-
     init() {
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "onboarding_done")
         self.currentUserId = UserDefaults.standard.string(forKey: "current_user_id")
-    }
-
-    func logout() {
-        currentUserId = nil
     }
 }

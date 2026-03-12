@@ -110,19 +110,6 @@ struct AIChatView: View {
         }
         .navigationTitle(conversation?.title ?? "新对话")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if let config = defaultConfig {
-                    Text(config.name)
-                        .font(.caption2)
-                        .padding(.horizontal, FHSpacing.sm)
-                        .padding(.vertical, FHSpacing.xs)
-                        .background(FHColors.primary.opacity(0.1))
-                        .foregroundStyle(FHColors.primary)
-                        .clipShape(Capsule())
-                }
-            }
-        }
         .onAppear { loadConversation() }
         .swAlert(isPresented: $showAlert, type: alertType, message: alertMessage)
     }

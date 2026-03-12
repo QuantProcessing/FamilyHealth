@@ -36,13 +36,6 @@ struct SettingsView: View {
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
-                                Text(appState.isLoggedIn ? "已登录" : "")
-                                    .font(.caption)
-                                    .padding(.horizontal, FHSpacing.sm)
-                                    .padding(.vertical, 2)
-                                    .background(FHColors.success.opacity(0.1))
-                                    .foregroundStyle(FHColors.success)
-                                    .clipShape(Capsule())
                             }
                         }
                     }
@@ -109,14 +102,7 @@ struct SettingsView: View {
                     }
                 }
 
-                // Logout
-                Section {
-                    Button(role: .destructive) {
-                        appState.logout()
-                    } label: {
-                        Label("退出登录", systemImage: "rectangle.portrait.and.arrow.right")
-                    }
-                }
+
             }
             .navigationTitle("设置")
         }
