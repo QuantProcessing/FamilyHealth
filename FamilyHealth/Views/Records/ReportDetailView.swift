@@ -174,6 +174,12 @@ struct ReportDetailView: View {
 
                 if let analysis = report.aiAnalysis {
                     AutoSizingMarkdownView(markdown: analysis)
+
+                    // Medical disclaimer
+                    Label("AI 生成的内容可能有误，身体不适请及时就医", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .padding(.top, FHSpacing.sm)
                 } else {
                     VStack(spacing: FHSpacing.sm) {
                         if isAnalyzing {

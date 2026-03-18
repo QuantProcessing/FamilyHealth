@@ -159,6 +159,15 @@ struct AIChatView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
 
+            // Medical disclaimer
+            Label("AI 生成的内容可能有误，身体不适请及时就医", systemImage: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.orange.opacity(0.1))
+                .clipShape(RoundedRectangle(cornerRadius: FHRadius.small))
+
             // Quick prompts
             VStack(spacing: FHSpacing.sm) {
                 QuickPromptButton(icon: "doc.text.viewfinder", text: "帮我分析最近的体检报告") {
