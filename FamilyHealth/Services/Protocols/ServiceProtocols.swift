@@ -53,7 +53,8 @@ protocol AIServiceProtocol {
     func chat(
         messages: [ChatMessage],
         config: AIModelConfig,
-        apiKey: String
+        apiKey: String,
+        targetUserIds: [UUID]
     ) -> AsyncThrowingStream<String, Error>
 
     func analyze(

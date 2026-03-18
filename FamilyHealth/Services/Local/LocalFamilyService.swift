@@ -4,19 +4,12 @@ import SwiftData
 @MainActor
 final class LocalFamilyService: FamilyService {
     private let context: ModelContext
-    static let maxGroupsPerUser = 2
 
     init(context: ModelContext) {
         self.context = context
     }
 
     func createGroup(name: String, creatorId: UUID) async throws -> FamilyGroup {
-        // Check the 2-group limit
-        let count = try await getUserGroupCount(userId: creatorId)
-        guard count < Self.maxGroupsPerUser else {
-            throw FamilyError.groupLimitReached
-        }
-
         let group = FamilyGroup(name: name, creatorId: creatorId)
         context.insert(group)
 
@@ -49,12 +42,6 @@ final class LocalFamilyService: FamilyService {
     }
 
     func addMember(groupId: UUID, userId: UUID, role: FamilyMember.Role, invitedBy: UUID) async throws {
-        // Check the 2-group limit for the joining user
-        let count = try await getUserGroupCount(userId: userId)
-        guard count < Self.maxGroupsPerUser else {
-            throw FamilyError.groupLimitReached
-        }
-
         guard let group = try await fetchGroup(id: groupId) else {
             throw FamilyError.groupNotFound
         }
@@ -105,14 +92,12 @@ final class LocalFamilyService: FamilyService {
 }
 
 enum FamilyError: LocalizedError {
-    case groupLimitReached
     case groupNotFound
     case alreadyMember
     case notAdmin
 
     var errorDescription: String? {
         switch self {
-        case .groupLimitReached: return String(localized: "最多只能加入 2 个家庭组")
         case .groupNotFound: return String(localized: "家庭组不存在")
         case .alreadyMember: return String(localized: "已经是该家庭组成员")
         case .notAdmin: return String(localized: "权限不足，仅管理员可操作")

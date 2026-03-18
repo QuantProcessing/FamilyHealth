@@ -5,8 +5,10 @@ struct AIChatListView: View {
     @EnvironmentObject private var appState: AppState
     @Query(sort: \ChatConversation.updatedAt, order: .reverse) private var conversations: [ChatConversation]
     @Query private var aiConfigs: [AIModelConfig]
+    @Query private var allMembers: [FamilyMember]
     @Environment(\.modelContext) private var context
 
+    @State private var selectedMemberId: UUID?
     @State private var conversationToDelete: ChatConversation?
     @State private var conversationToRename: ChatConversation?
     @State private var renameText = ""
@@ -15,12 +17,28 @@ struct AIChatListView: View {
 
     private var hasAIConfig: Bool { !aiConfigs.isEmpty }
 
+    private var currentUUID: UUID? {
+        guard let id = appState.currentUserId else { return nil }
+        return UUID(uuidString: id)
+    }
+
+    /// Whether user has any family groups
+    private var hasFamily: Bool {
+        guard let uuid = currentUUID else { return false }
+        return allMembers.contains { $0.userId == uuid && $0.group != nil }
+    }
+
+    private var filteredConversations: [ChatConversation] {
+        guard let filterUUID = selectedMemberId, hasFamily else { return conversations }
+        return conversations.filter { $0.userId == filterUUID }
+    }
+
     var body: some View {
         NavigationStack {
             Group {
                 if !hasAIConfig {
                     noConfigView
-                } else if conversations.isEmpty {
+                } else if filteredConversations.isEmpty {
                     emptyView
                 } else {
                     conversationList
@@ -31,11 +49,16 @@ struct AIChatListView: View {
                 if hasAIConfig {
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
-                            AIChatView(conversationId: nil)
+                            AIChatView(conversationId: nil, forUserId: selectedMemberId)
                         } label: {
                             Image(systemName: "square.and.pencil")
                         }
                     }
+                }
+            }
+            .onAppear {
+                if selectedMemberId == nil, let uuid = currentUUID {
+                    selectedMemberId = uuid
                 }
             }
             .alert("重命名对话", isPresented: $showRenameAlert) {
@@ -92,7 +115,7 @@ struct AIChatListView: View {
                 description: "与 AI 健康助手对话，获取专业的健康分析和建议"
             )
             NavigationLink {
-                AIChatView(conversationId: nil)
+                AIChatView(conversationId: nil, forUserId: selectedMemberId)
             } label: {
                 Text("新建对话")
                     .font(.headline)
@@ -108,7 +131,12 @@ struct AIChatListView: View {
 
     private var conversationList: some View {
         List {
-            ForEach(conversations) { conv in
+            // Family member filter
+            if hasFamily, let memberId = Binding($selectedMemberId) {
+                FamilyMemberPicker(selectedUserId: memberId)
+            }
+
+            ForEach(filteredConversations) { conv in
                 NavigationLink {
                     AIChatView(conversationId: conv.id)
                 } label: {

@@ -15,41 +15,30 @@ struct SettingsView: View {
             List {
                 // Profile header
                 Section {
-                    HStack(spacing: FHSpacing.lg) {
-                        Circle()
-                            .fill(FHGradients.profileAvatar)
-                            .frame(width: 60, height: 60)
-                            .overlay(
-                                Image(systemName: "person.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                            )
-                            .fhShadow(.light)
-
-                        VStack(alignment: .leading, spacing: FHSpacing.xs) {
-                            Text(currentUser?.name ?? "用户")
-                                .font(.title3.bold())
-                            HStack(spacing: 4) {
-                                if let user = currentUser {
-                                    Text(user.gender == .male ? "♂" : "♀")
-                                    Text(user.phone)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.vertical, FHSpacing.xs)
-                }
-
-                // Account
-                Section("账户") {
                     NavigationLink {
                         ProfileEditView()
                     } label: {
-                        Label("个人资料", systemImage: "person.circle")
-                    }
+                        HStack(spacing: FHSpacing.lg) {
+                            Circle()
+                                .fill(FHGradients.profileAvatar)
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    Image(systemName: "person.fill")
+                                        .font(.title2)
+                                        .foregroundStyle(.white)
+                                )
+                                .fhShadow(.light)
 
+                            VStack(alignment: .leading, spacing: FHSpacing.xs) {
+                                Text(currentUser?.name ?? "用户")
+                                    .font(.title3.bold())
+                                Text("点击编辑个人资料")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.vertical, FHSpacing.xs)
+                    }
                 }
 
                 // AI Config
@@ -402,7 +391,12 @@ struct ProfileEditView: View {
     var body: some View {
         Form {
             Section("基本信息") {
-                TextField("姓名", text: $name)
+                HStack {
+                    Text("姓名")
+                    Spacer()
+                    TextField("请输入姓名", text: $name)
+                        .multilineTextAlignment(.trailing)
+                }
                 Picker("性别", selection: $gender) {
                     ForEach(User.Gender.allCases, id: \.self) { g in
                         Text(g.displayName).tag(g)
@@ -726,8 +720,8 @@ struct HelpView: View {
             ("AI 能分析什么？", "AI 可以分析您的体检报告指标、提供健康建议、解答医学问题。请注意 AI 建议仅供参考，不能替代医生诊断。"),
         ]),
         ("person.3", "家庭管理", [
-            ("如何邀请家人加入？", "创建家庭组后，点击「生成邀请二维码」，让家人扫码即可加入。"),
-            ("最多可以加入几个家庭组？", "每位用户最多可以加入 2 个家庭组。"),
+            ("如何添加家庭成员？", "在家庭组详情中点击「添加成员」，填写姓名和基本信息即可。"),
+            ("可以加入几个家庭组？", "没有数量限制，您可以根据需要创建或加入多个家庭组。"),
             ("管理员可以看到成员的什么数据？", "管理员可以查看成员的体检报告。病例记录和 AI 对话属于个人隐私，不可查看。"),
         ]),
         ("lock.shield", "数据安全", [

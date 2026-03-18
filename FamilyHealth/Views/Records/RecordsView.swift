@@ -2,11 +2,24 @@ import SwiftUI
 import SwiftData
 
 struct RecordsView: View {
+    @EnvironmentObject private var appState: AppState
+    @Query private var allMembers: [FamilyMember]
     @State private var selectedTab = 0
     @State private var searchText = ""
     @State private var showUploadReport = false
     @State private var showAddCase = false
     @State private var fabScale: CGFloat = 1.0
+    @State private var selectedMemberId: UUID?
+
+    private var currentUUID: UUID? {
+        guard let id = appState.currentUserId else { return nil }
+        return UUID(uuidString: id)
+    }
+
+    private var hasFamily: Bool {
+        guard let uuid = currentUUID else { return false }
+        return allMembers.contains { $0.userId == uuid && $0.group != nil }
+    }
 
     var body: some View {
         NavigationStack {
@@ -19,11 +32,17 @@ struct RecordsView: View {
                 .pickerStyle(.segmented)
                 .padding()
 
-                // Search bar
+                // Search bar + family filter
                 HStack(spacing: FHSpacing.sm) {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.secondary)
                     TextField("搜索", text: $searchText)
+
+                    if hasFamily, let memberId = Binding($selectedMemberId) {
+                        Divider().frame(height: 20)
+                        FamilyMemberPicker(selectedUserId: memberId)
+                            .pickerStyle(.menu)
+                    }
                 }
                 .padding(FHSpacing.md)
                 .background(FHColors.subtleGray)
@@ -32,9 +51,9 @@ struct RecordsView: View {
 
                 // Content
                 if selectedTab == 0 {
-                    ReportListContent(searchText: searchText)
+                    ReportListContent(searchText: searchText, filterUserId: hasFamily ? selectedMemberId : nil)
                 } else {
-                    CaseListContent(searchText: searchText)
+                    CaseListContent(searchText: searchText, filterUserId: hasFamily ? selectedMemberId : nil)
                 }
             }
             .navigationTitle("健康档案")
@@ -71,6 +90,11 @@ struct RecordsView: View {
             .sheet(isPresented: $showAddCase) {
                 AddCaseView()
             }
+            .onAppear {
+                if selectedMemberId == nil, let uuid = currentUUID {
+                    selectedMemberId = uuid
+                }
+            }
         }
     }
 }
@@ -78,14 +102,21 @@ struct RecordsView: View {
 // MARK: - Report List
 struct ReportListContent: View {
     let searchText: String
+    var filterUserId: UUID? = nil
     @Query(sort: \HealthReport.reportDate, order: .reverse) private var reports: [HealthReport]
 
     private var filtered: [HealthReport] {
-        if searchText.isEmpty { return reports }
-        return reports.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            ($0.hospitalName?.localizedCaseInsensitiveContains(searchText) ?? false)
+        var result = reports
+        if let uid = filterUserId {
+            result = result.filter { $0.userId == uid }
         }
+        if !searchText.isEmpty {
+            result = result.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                ($0.hospitalName?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+        return result
     }
 
     var body: some View {
@@ -161,14 +192,21 @@ struct ReportRow: View {
 // MARK: - Case List
 struct CaseListContent: View {
     let searchText: String
+    var filterUserId: UUID? = nil
     @Query(sort: \MedicalCase.visitDate, order: .reverse) private var cases: [MedicalCase]
 
     private var filtered: [MedicalCase] {
-        if searchText.isEmpty { return cases }
-        return cases.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            ($0.diagnosis?.localizedCaseInsensitiveContains(searchText) ?? false)
+        var result = cases
+        if let uid = filterUserId {
+            result = result.filter { $0.userId == uid }
         }
+        if !searchText.isEmpty {
+            result = result.filter {
+                $0.title.localizedCaseInsensitiveContains(searchText) ||
+                ($0.diagnosis?.localizedCaseInsensitiveContains(searchText) ?? false)
+            }
+        }
+        return result
     }
 
     var body: some View {

@@ -16,6 +16,7 @@ struct AddCaseView: View {
     @State private var symptoms: [String] = []
     @State private var medications: [MedicationDraft] = []
     @State private var notes = ""
+    @State private var selectedMemberId: UUID?
     @State private var isSaving = false
     @State private var showAlert = false
     @State private var alertType: SWAlertType = .success
@@ -26,6 +27,10 @@ struct AddCaseView: View {
             Form {
                 // Basic info
                 Section("基本信息") {
+                    // Family member picker
+                    if let memberId = Binding($selectedMemberId) {
+                        FamilyMemberPicker(selectedUserId: memberId)
+                    }
                     TextField("病例标题", text: $title)
                     DatePicker("就诊日期", selection: $visitDate, displayedComponents: .date)
                     TextField("医院名称", text: $hospitalName)
@@ -132,6 +137,13 @@ struct AddCaseView: View {
                 }
             }
             .swAlert(isPresented: $showAlert, type: alertType, message: alertMessage)
+            .onAppear {
+                if selectedMemberId == nil,
+                   let id = appState.currentUserId,
+                   let uuid = UUID(uuidString: id) {
+                    selectedMemberId = uuid
+                }
+            }
         }
     }
 
@@ -146,11 +158,12 @@ struct AddCaseView: View {
         isSaving = true
         defer { isSaving = false }
 
-        guard let userId = appState.currentUserId, let uuid = UUID(uuidString: userId) else { return }
+        guard let uploaderId = appState.currentUserId, let uploaderUUID = UUID(uuidString: uploaderId) else { return }
+        let targetUserId = selectedMemberId ?? uploaderUUID
 
         let medicalCase = MedicalCase(
-            userId: uuid,
-            uploaderId: uuid,
+            userId: targetUserId,
+            uploaderId: uploaderUUID,
             title: title,
             hospitalName: hospitalName.isEmpty ? nil : hospitalName,
             doctorName: doctorName.isEmpty ? nil : doctorName,

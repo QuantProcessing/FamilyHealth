@@ -16,7 +16,8 @@ final class LocalAIService: AIServiceProtocol {
     func chat(
         messages: [ChatMessage],
         config: AIModelConfig,
-        apiKey: String
+        apiKey: String,
+        targetUserIds: [UUID] = []
     ) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {
@@ -25,9 +26,10 @@ final class LocalAIService: AIServiceProtocol {
                     let query = messages.last(where: { $0.role == .user })?.content ?? ""
 
                     // 2. RAG: retrieve relevant health data context
-                    let contextText = try await buildRAGContext(
+                    let contextText = try await self.buildRAGContext(
                         query: query,
-                        referenceIds: messages.last?.referenceIds ?? []
+                        referenceIds: messages.last?.referenceIds ?? [],
+                        targetUserIds: targetUserIds
                     )
 
                     // 3. Build system prompt
@@ -110,7 +112,7 @@ final class LocalAIService: AIServiceProtocol {
 
     // MARK: - RAG Context Builder
 
-    private func buildRAGContext(query: String, referenceIds: [UUID]) async throws -> String {
+    private func buildRAGContext(query: String, referenceIds: [UUID], targetUserIds: [UUID]) async throws -> String {
         var parts: [String] = []
 
         // 1. If specific references provided, fetch those directly
@@ -127,15 +129,15 @@ final class LocalAIService: AIServiceProtocol {
 
         // 2. Semantic search using NLEmbedding (fallback to keyword search)
         if parts.isEmpty && !query.isEmpty {
-            let (reports, cases) = try semanticSearch(query: query, topK: 3)
+            let (reports, cases) = try semanticSearch(query: query, topK: 3, targetUserIds: targetUserIds)
             parts += reports.map { formatReport($0) }
             parts += cases.map { formatCase($0) }
         }
 
         // 3. If still empty, include recent data overview
         if parts.isEmpty {
-            let recentReports = try fetchRecentReports(limit: 5)
-            let recentCases = try fetchRecentCases(limit: 5)
+            let recentReports = try fetchRecentReports(limit: 5, targetUserIds: targetUserIds)
+            let recentCases = try fetchRecentCases(limit: 5, targetUserIds: targetUserIds)
             if !recentReports.isEmpty {
                 parts.append("### 最近体检报告")
                 parts += recentReports.map { formatReport($0) }
@@ -160,16 +162,22 @@ final class LocalAIService: AIServiceProtocol {
 
     /// Compute sentence-level cosine similarity using NLEmbedding.
     /// Falls back to keyword search if embedding is unavailable.
-    private func semanticSearch(query: String, topK: Int) throws -> ([HealthReport], [MedicalCase]) {
+    private func semanticSearch(query: String, topK: Int, targetUserIds: [UUID]) throws -> ([HealthReport], [MedicalCase]) {
         // Try to get sentence embedding (supports Chinese + English)
         guard let embedding = NLEmbedding.sentenceEmbedding(for: .simplifiedChinese) else {
             // Fallback: keyword search
-            return (try keywordSearchReports(query: query, limit: topK),
-                    try keywordSearchCases(query: query, limit: topK))
+            return (try keywordSearchReports(query: query, limit: topK, targetUserIds: targetUserIds),
+                    try keywordSearchCases(query: query, limit: topK, targetUserIds: targetUserIds))
         }
 
-        let allReports = try context.fetch(FetchDescriptor<HealthReport>())
-        let allCases = try context.fetch(FetchDescriptor<MedicalCase>())
+        var allReports = try context.fetch(FetchDescriptor<HealthReport>())
+        var allCases = try context.fetch(FetchDescriptor<MedicalCase>())
+
+        // Filter by targetUserIds if specified
+        if !targetUserIds.isEmpty {
+            allReports = allReports.filter { targetUserIds.contains($0.userId) }
+            allCases = allCases.filter { targetUserIds.contains($0.userId) }
+        }
 
         // Score each report by semantic similarity
         var reportScores: [(report: HealthReport, score: Double)] = []
@@ -203,8 +211,8 @@ final class LocalAIService: AIServiceProtocol {
 
         // If semantic search found nothing, fall back to keyword
         if topReports.isEmpty && topCases.isEmpty {
-            return (try keywordSearchReports(query: query, limit: topK),
-                    try keywordSearchCases(query: query, limit: topK))
+            return (try keywordSearchReports(query: query, limit: topK, targetUserIds: targetUserIds),
+                    try keywordSearchCases(query: query, limit: topK, targetUserIds: targetUserIds))
         }
 
         return (Array(topReports), Array(topCases))
@@ -236,9 +244,12 @@ final class LocalAIService: AIServiceProtocol {
 
     // MARK: - Keyword Search Fallback
 
-    private func keywordSearchReports(query: String, limit: Int) throws -> [HealthReport] {
-        let all = try context.fetch(FetchDescriptor<HealthReport>())
+    private func keywordSearchReports(query: String, limit: Int, targetUserIds: [UUID]) throws -> [HealthReport] {
+        var all = try context.fetch(FetchDescriptor<HealthReport>())
         guard !query.isEmpty else { return [] }
+        if !targetUserIds.isEmpty {
+            all = all.filter { targetUserIds.contains($0.userId) }
+        }
         return Array(all.filter {
             $0.title.localizedStandardContains(query) ||
             ($0.hospitalName?.localizedStandardContains(query) ?? false) ||
@@ -247,9 +258,12 @@ final class LocalAIService: AIServiceProtocol {
         }.prefix(limit))
     }
 
-    private func keywordSearchCases(query: String, limit: Int) throws -> [MedicalCase] {
-        let all = try context.fetch(FetchDescriptor<MedicalCase>())
+    private func keywordSearchCases(query: String, limit: Int, targetUserIds: [UUID]) throws -> [MedicalCase] {
+        var all = try context.fetch(FetchDescriptor<MedicalCase>())
         guard !query.isEmpty else { return [] }
+        if !targetUserIds.isEmpty {
+            all = all.filter { targetUserIds.contains($0.userId) }
+        }
         return Array(all.filter {
             $0.title.localizedStandardContains(query) ||
             ($0.diagnosis?.localizedStandardContains(query) ?? false) ||
@@ -271,20 +285,28 @@ final class LocalAIService: AIServiceProtocol {
         return try context.fetch(descriptor).first { $0.id == targetId }
     }
 
-    private func fetchRecentReports(limit: Int) throws -> [HealthReport] {
+    private func fetchRecentReports(limit: Int, targetUserIds: [UUID]) throws -> [HealthReport] {
         var descriptor = FetchDescriptor<HealthReport>(
             sortBy: [SortDescriptor(\.reportDate, order: .reverse)]
         )
         descriptor.fetchLimit = limit
-        return try context.fetch(descriptor)
+        var results = try context.fetch(descriptor)
+        if !targetUserIds.isEmpty {
+            results = results.filter { targetUserIds.contains($0.userId) }
+        }
+        return results
     }
 
-    private func fetchRecentCases(limit: Int) throws -> [MedicalCase] {
+    private func fetchRecentCases(limit: Int, targetUserIds: [UUID]) throws -> [MedicalCase] {
         var descriptor = FetchDescriptor<MedicalCase>(
             sortBy: [SortDescriptor(\.visitDate, order: .reverse)]
         )
         descriptor.fetchLimit = limit
-        return try context.fetch(descriptor)
+        var results = try context.fetch(descriptor)
+        if !targetUserIds.isEmpty {
+            results = results.filter { targetUserIds.contains($0.userId) }
+        }
+        return results
     }
 
     private func fetchRecentHealthKitData() throws -> [HealthKitRecord] {
@@ -295,10 +317,17 @@ final class LocalAIService: AIServiceProtocol {
         return try context.fetch(descriptor)
     }
 
-    // MARK: - Formatters
+    // MARK: - Helpers
+
+    /// Look up user name by UUID
+    private func userName(for userId: UUID) -> String {
+        let allUsers = (try? context.fetch(FetchDescriptor<User>())) ?? []
+        return allUsers.first(where: { $0.id == userId })?.name ?? "未知"
+    }
 
     private func formatReport(_ report: HealthReport) -> String {
-        var s = "📋 **\(report.title)** (\(report.reportType.displayName))\n"
+        let owner = userName(for: report.userId)
+        var s = "📋 **\(report.title)** (\(report.reportType.displayName)) — \(owner)\n"
         s += "日期: \(report.reportDate.formatted(date: .abbreviated, time: .omitted))\n"
         if let h = report.hospitalName { s += "医院: \(h)\n" }
         if let n = report.notes { s += "备注: \(n)\n" }
@@ -311,7 +340,8 @@ final class LocalAIService: AIServiceProtocol {
     }
 
     private func formatCase(_ c: MedicalCase) -> String {
-        var s = "🏥 **\(c.title)**\n"
+        let owner = userName(for: c.userId)
+        var s = "🏥 **\(c.title)** — \(owner)\n"
         s += "就诊日期: \(c.visitDate.formatted(date: .abbreviated, time: .omitted))\n"
         if let h = c.hospitalName { s += "医院: \(h)\n" }
         if let d = c.doctorName { s += "医生: \(d)\n" }

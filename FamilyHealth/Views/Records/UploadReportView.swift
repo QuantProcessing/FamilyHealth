@@ -1,5 +1,4 @@
 import SwiftUI
-import PhotosUI
 import SwiftData
 import UniformTypeIdentifiers
 
@@ -11,7 +10,6 @@ struct UploadReportView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var currentStep = 0
-    @State private var selectedPhotos: [PhotosPickerItem] = []
     @State private var imageData: [Data] = []
     @State private var title = ""
     @State private var hospitalName = ""
@@ -74,27 +72,30 @@ struct UploadReportView: View {
                     showAlert = true
                 }
             }
+            .onAppear {
+                if selectedMemberId == nil,
+                   let id = appState.currentUserId,
+                   let uuid = UUID(uuidString: id) {
+                    selectedMemberId = uuid
+                }
+            }
         }
     }
-
-    // MARK: - Step 1: File Selection
 
     private var step1FileSelection: some View {
         ScrollView {
             VStack(spacing: FHSpacing.xl) {
-                // Photo picker
-                PhotosPicker(
-                    selection: $selectedPhotos,
-                    maxSelectionCount: 10,
-                    matching: .images
-                ) {
+                // PDF file picker - primary action
+                Button {
+                    showFileImporter = true
+                } label: {
                     VStack(spacing: 12) {
-                        Image(systemName: "arrow.up.doc")
+                        Image(systemName: "doc.badge.plus")
                             .font(.system(size: 40))
                             .foregroundStyle(FHColors.primary)
-                        Text("点击选择报告图片")
+                        Text("点击选择报告文件")
                             .font(.headline)
-                        Text("支持从相册选择，最多 10 张")
+                        Text("支持 PDF 格式的体检报告")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -106,87 +107,42 @@ struct UploadReportView: View {
                             .foregroundStyle(FHColors.primary.opacity(0.3))
                     )
                 }
-                .onChange(of: selectedPhotos) { _, newItems in
-                    Task { await loadPhotos(newItems) }
-                }
+                .fhPressStyle()
 
-                // Selected image preview
+                // Selected file preview
                 if !imageData.isEmpty {
                     SWSectionHeader("已选 \(imageData.count) 个文件")
                     LazyVGrid(columns: [.init(), .init(), .init()], spacing: FHSpacing.sm) {
                         ForEach(imageData.indices, id: \.self) { index in
-                            if let uiImage = UIImage(data: imageData[index]) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(height: 100)
-                                    .clipShape(RoundedRectangle(cornerRadius: FHRadius.small))
-                                    .overlay(alignment: .topTrailing) {
-                                        Button {
-                                            if index < pdfFileNames.count {
-                                                pdfFileNames.remove(at: max(0, index - (imageData.count - pdfFileNames.count)))
-                                            }
-                                            imageData.remove(at: index)
-                                        } label: {
-                                            Image(systemName: "xmark.circle.fill")
-                                                .foregroundStyle(.white, .red)
-                                        }
-                                        .padding(4)
+                            // PDF file placeholder
+                            VStack(spacing: 4) {
+                                Image(systemName: "doc.fill")
+                                    .font(.title)
+                                    .foregroundStyle(FHColors.primary)
+                                Text(index < pdfFileNames.count ? pdfFileNames[index] : "PDF")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 100)
+                            .background(FHColors.subtleGray)
+                            .clipShape(RoundedRectangle(cornerRadius: FHRadius.small))
+                            .overlay(alignment: .topTrailing) {
+                                Button {
+                                    imageData.remove(at: index)
+                                    if index < pdfFileNames.count {
+                                        pdfFileNames.remove(at: index)
                                     }
-                            } else {
-                                // PDF file placeholder
-                                VStack(spacing: 4) {
-                                    Image(systemName: "doc.fill")
-                                        .font(.title)
-                                        .foregroundStyle(FHColors.danger)
-                                    Text("PDF")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.white, .red)
                                 }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 100)
-                                .background(FHColors.subtleGray)
-                                .clipShape(RoundedRectangle(cornerRadius: FHRadius.small))
-                                .overlay(alignment: .topTrailing) {
-                                    Button {
-                                        imageData.remove(at: index)
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundStyle(.white, .red)
-                                    }
-                                    .padding(4)
-                                }
+                                .padding(4)
                             }
                         }
                     }
                 }
-
-                // PDF file picker button
-                Button {
-                    showFileImporter = true
-                } label: {
-                    HStack {
-                        Image(systemName: "doc.badge.plus")
-                            .font(.title3)
-                            .foregroundStyle(FHColors.caseOrange)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("从文件导入 PDF")
-                                .font(.subheadline.bold())
-                                .foregroundStyle(.primary)
-                            Text("支持 PDF 格式的体检报告")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding()
-                    .background(FHColors.cardBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: FHRadius.medium))
-                    .fhShadow(.light)
-                }
-                .fhPressStyle()
             }
             .padding()
         }
@@ -197,6 +153,9 @@ struct UploadReportView: View {
     private var step2FillInfo: some View {
         Form {
             Section("报告标题") {
+                if let memberId = Binding($selectedMemberId) {
+                    FamilyMemberPicker(selectedUserId: memberId)
+                }
                 TextField("例：2025年度体检报告", text: $title)
             }
 
@@ -336,25 +295,16 @@ struct UploadReportView: View {
 
     // MARK: - Actions
 
-    private func loadPhotos(_ items: [PhotosPickerItem]) async {
-        var loaded: [Data] = []
-        for item in items {
-            if let data = try? await item.loadTransferable(type: Data.self) {
-                loaded.append(data)
-            }
-        }
-        imageData = loaded
-    }
-
     private func saveReport() async {
         isSaving = true
         defer { isSaving = false }
 
-        guard let userId = appState.currentUserId, let uuid = UUID(uuidString: userId) else { return }
+        guard let uploaderId = appState.currentUserId, let uploaderUUID = UUID(uuidString: uploaderId) else { return }
+        let targetUserId = selectedMemberId ?? uploaderUUID
 
         let report = HealthReport(
-            userId: uuid,
-            uploaderId: uuid,
+            userId: targetUserId,
+            uploaderId: uploaderUUID,
             title: title,
             hospitalName: hospitalName.isEmpty ? nil : hospitalName,
             reportDate: reportDate,
