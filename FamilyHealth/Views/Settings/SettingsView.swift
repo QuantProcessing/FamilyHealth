@@ -56,17 +56,6 @@ struct SettingsView: View {
                 // General
                 Section("通用") {
                     NavigationLink {
-                        LanguageSettingsView()
-                    } label: {
-                        HStack {
-                            Label("语言 Language", systemImage: "globe")
-                            Spacer()
-                            Text("简体中文")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    NavigationLink {
                         DataManagementView()
                     } label: {
                         Label("数据管理", systemImage: "externaldrive")
@@ -480,82 +469,6 @@ struct ProfileEditView: View {
     }
 }
 
-// MARK: - Language Settings
-
-struct LanguageSettingsView: View {
-    private var currentLanguage: String {
-        Locale.preferredLanguages.first ?? "zh-Hans"
-    }
-
-    private var isChinese: Bool {
-        currentLanguage.hasPrefix("zh")
-    }
-
-    var body: some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: FHSpacing.md) {
-                    Image(systemName: "globe")
-                        .font(.largeTitle)
-                        .foregroundStyle(FHColors.primary)
-                    Text("语言跟随系统设置")
-                        .font(.headline)
-                    Text("FamilyHealth 支持简体中文和 English。应用语言由 iOS 系统语言决定，请在系统设置中切换。")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, FHSpacing.sm)
-            }
-
-            Section {
-                Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    Label("打开系统设置", systemImage: "gear")
-                }
-            } footer: {
-                Text("设置 → 通用 → 语言与地区 → 首选语言")
-            }
-
-            Section("支持的语言") {
-                HStack {
-                    Image(systemName: "character.bubble")
-                        .foregroundStyle(FHColors.primary)
-                    Text("简体中文")
-                    Spacer()
-                    if isChinese {
-                        Text("当前")
-                            .font(.caption)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(FHColors.success)
-                            .clipShape(Capsule())
-                    }
-                }
-                HStack {
-                    Image(systemName: "a.circle")
-                        .foregroundStyle(FHColors.info)
-                    Text("English")
-                    Spacer()
-                    if !isChinese {
-                        Text("Active")
-                            .font(.caption)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 2)
-                            .background(FHColors.success)
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-        }
-        .navigationTitle("语言设置")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
 
 // MARK: - Data Management
 
