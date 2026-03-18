@@ -7,6 +7,9 @@ struct RootView: View {
     @Environment(\.modelContext) private var context
     @Query private var aiConfigs: [AIModelConfig]
 
+    @AppStorage("hasAcknowledgedDisclaimer") private var hasAcknowledgedDisclaimer = false
+    @State private var showDisclaimer = false
+
     var body: some View {
         Group {
             if !appState.hasCompletedOnboarding {
@@ -19,6 +22,16 @@ struct RootView: View {
         .onAppear {
             ensureDefaultUser()
             ensureBuiltInAIModel()
+            if !hasAcknowledgedDisclaimer && appState.hasCompletedOnboarding {
+                showDisclaimer = true
+            }
+        }
+        .alert("重要提示", isPresented: $showDisclaimer) {
+            Button("我已了解") {
+                hasAcknowledgedDisclaimer = true
+            }
+        } message: {
+            Text("本应用为个人开源项目，AI 分析结果仅供参考，不能替代专业医疗诊断。\n\n身体不适请务必及时就医，以医生的诊断为准。")
         }
     }
 

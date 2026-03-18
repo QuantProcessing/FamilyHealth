@@ -65,19 +65,13 @@ struct SettingsView: View {
 
                 // About
                 Section("关于") {
-                    HStack {
-                        Label("版本", systemImage: "info.circle")
-                        Spacer()
-                        Text("v1.0.0")
-                            .foregroundStyle(.secondary)
-                    }
-
-                    NavigationLink { PrivacyPolicyView() } label: {
-                        Label("隐私政策", systemImage: "hand.raised")
-                    }
-
-                    NavigationLink { HelpView() } label: {
-                        Label("使用帮助", systemImage: "questionmark.circle")
+                    NavigationLink { AboutView() } label: {
+                        HStack {
+                            Label("关于家庭健康AI版", systemImage: "info.circle")
+                            Spacer()
+                            Text("v1.0.1")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
 
@@ -469,6 +463,86 @@ struct ProfileEditView: View {
     }
 }
 
+
+// MARK: - About
+
+struct AboutView: View {
+    var body: some View {
+        List {
+            // App info header
+            Section {
+                VStack(spacing: FHSpacing.lg) {
+                    Image(systemName: "heart.circle.fill")
+                        .font(.system(size: 64))
+                        .foregroundStyle(FHColors.primary)
+
+                    Text("家庭健康AI版")
+                        .font(.title2.bold())
+                    Text("版本 1.0.1")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, FHSpacing.lg)
+            }
+
+            // Open source notice
+            Section {
+                VStack(alignment: .leading, spacing: FHSpacing.md) {
+                    Label("开源项目", systemImage: "lock.open")
+                        .font(.headline)
+                    Text("本应用为个人开源项目，源代码公开透明。欢迎参与贡献和反馈。")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, FHSpacing.sm)
+
+                Button {
+                    if let url = URL(string: "https://github.com/QuantProcessing/FamilyHealth") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Label("GitHub 仓库", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+            }
+
+            // Medical disclaimer
+            Section {
+                VStack(alignment: .leading, spacing: FHSpacing.md) {
+                    Label("免责声明", systemImage: "exclamationmark.triangle.fill")
+                        .font(.headline)
+                        .foregroundStyle(.orange)
+                    Text("本应用提供的 AI 分析结果仅供参考，不构成任何医疗建议。AI 生成的内容可能存在误差，不能替代专业医疗诊断。")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    Text("如有身体不适，请务必及时前往医院就诊，以专业医生的诊断和治疗方案为准。")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.primary)
+                }
+                .padding(.vertical, FHSpacing.sm)
+            }
+
+            // Links
+            Section("更多") {
+                NavigationLink { PrivacyPolicyView() } label: {
+                    Label("隐私政策", systemImage: "hand.raised")
+                }
+                NavigationLink { HelpView() } label: {
+                    Label("使用帮助", systemImage: "questionmark.circle")
+                }
+                Button {
+                    if let url = URL(string: "https://quantprocessing.github.io/FamilyHealth/support.html") {
+                        UIApplication.shared.open(url)
+                    }
+                } label: {
+                    Label("技术支持", systemImage: "wrench.and.screwdriver")
+                }
+            }
+        }
+        .navigationTitle("关于")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
 
 // MARK: - Data Management
 
