@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDisplayName</key>
+	<string>智康管家</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>FamilyHealth 需要读取您的健康数据（步数、心率、血氧、血压、体重、睡眠等），以便 AI 结合您的实时健康指标给出个性化建议。</string>
 	<key>NSHealthUpdateUsageDescription</key>
