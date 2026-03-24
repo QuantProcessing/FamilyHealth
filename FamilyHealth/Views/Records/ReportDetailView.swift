@@ -173,13 +173,20 @@ struct ReportDetailView: View {
                 }
 
                 if let analysis = report.aiAnalysis {
-                    AutoSizingMarkdownView(markdown: analysis)
+                    // Prominent disclaimer banner
+                    HStack(spacing: 6) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                        Text("以下内容由 AI 自动生成，仅供参考，不构成医疗诊断或建议。请携带报告咨询专业医生。")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.orange)
+                    .padding(FHSpacing.md)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: FHRadius.small))
 
-                    // Medical disclaimer
-                    Label("AI 生成的内容可能有误，身体不适请及时就医", systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                        .padding(.top, FHSpacing.sm)
+                    AutoSizingMarkdownView(markdown: analysis)
                 } else {
                     VStack(spacing: FHSpacing.sm) {
                         if isAnalyzing {

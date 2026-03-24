@@ -122,6 +122,18 @@ struct AIChatView: View {
 
             Divider()
 
+            // Persistent medical disclaimer
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                Text("AI 内容仅供参考，不构成医疗建议。身体不适请及时就医。")
+                    .font(.caption2)
+            }
+            .foregroundStyle(.orange)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+            .background(Color.orange.opacity(0.08))
+
             // Input bar
             inputBar
         }
