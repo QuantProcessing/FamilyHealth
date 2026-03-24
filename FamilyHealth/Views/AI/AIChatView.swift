@@ -21,6 +21,11 @@ struct AIChatView: View {
     @State private var scrollProxy: ScrollViewProxy?
     @State private var showMentionPicker = false
 
+    // AI data consent
+    @AppStorage("hasConsentedAIDataSharing") private var hasConsentedAIDataSharing = false
+    @State private var showDataConsent = false
+    @State private var pendingMessage: String?
+
     private var defaultConfig: AIModelConfig? {
         aiConfigs.first(where: \.isDefault) ?? aiConfigs.first
     }
@@ -141,6 +146,20 @@ struct AIChatView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadConversation() }
         .swAlert(isPresented: $showAlert, type: alertType, message: alertMessage)
+        .alert("AI 数据使用说明", isPresented: $showDataConsent) {
+            Button("不同意", role: .cancel) {
+                pendingMessage = nil
+            }
+            Button("同意并继续") {
+                hasConsentedAIDataSharing = true
+                if let msg = pendingMessage {
+                    pendingMessage = nil
+                    sendMessage(msg)
+                }
+            }
+        } message: {
+            Text("使用 AI 功能时，以下数据将通过 HTTPS 加密发送至第三方 AI 服务商（\(defaultConfig?.provider.displayName ?? "AI 服务商")）：\n\n• 您输入的对话文本\n• 相关的体检报告和病例摘要\n\n我们不存储或转发您的数据。详情请查看隐私政策。")
+        }
     }
 
     // MARK: - Welcome
@@ -339,6 +358,13 @@ struct AIChatView: View {
             alertType = .error
             alertMessage = "请先在设置中配置 AI 模型"
             showAlert = true
+            return
+        }
+
+        // Check AI data consent before first use
+        if !hasConsentedAIDataSharing {
+            pendingMessage = text
+            showDataConsent = true
             return
         }
 

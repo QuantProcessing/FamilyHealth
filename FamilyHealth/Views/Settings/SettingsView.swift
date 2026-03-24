@@ -304,7 +304,7 @@ struct AddAIModelView: View {
 
         Task {
             do {
-                let client = OpenAIClient()
+                let client = AIClient()
                 let success = try await client.testConnection(
                     endpoint: apiEndpoint, apiKey: apiKey, model: modelName)
                 testResult = success ? "✅ 连接成功，可以保存" : "❌ 连接失败"
@@ -656,7 +656,7 @@ struct PrivacyPolicyView: View {
                     "FamilyHealth 采用**本地优先**架构。在本地模式下，所有数据（体检报告、病例记录、AI 对话）均存储在您的设备上，不会上传至任何服务器。\n\n在联网模式下，数据将同步至您自己部署的后端服务器。")
 
                 policySection("2. AI 功能",
-                    "AI 功能使用您自行配置的 API 服务（如 OpenAI、DeepSeek 等）。当您使用 AI 对话或报告分析时，相关文本数据会发送至您配置的 API 端点。\n\n**我们不存储或转发您的 API 密钥和对话数据。** API 密钥使用 iOS Keychain 安全存储。")
+                    "AI 功能使用您自行配置的 API 服务（如 DeepSeek、硅基流动等）。当您使用 AI 对话或报告分析时，相关文本数据会发送至您配置的 API 端点。\n\n**我们不存储或转发您的 API 密钥和对话数据。** API 密钥使用 iOS Keychain 安全存储。")
 
                 policySection("3. 健康数据",
                     "体检报告图片和 PDF 文件存储在应用沙盒的 Documents 目录中。文本提取（OCR）在设备本地完成，提取的文本仅用于 AI 分析，不会外传。")
@@ -702,7 +702,7 @@ struct HelpView: View {
             ("PDF 报告如何提取文字？", "上传时会自动提取 PDF 中的文字内容。如果是扫描件，会使用 OCR 技术识别文字。"),
         ]),
         ("brain.head.profile", "AI 助手", [
-            ("如何配置 AI 模型？", "进入「设置 → AI 模型设置」，点击 + 号添加模型。支持所有 OpenAI 兼容的 API（如 DeepSeek、Ollama 等）。"),
+            ("如何配置 AI 模型？", "进入「设置 → AI 模型设置」，点击 + 号添加模型。支持 DeepSeek、硅基流动、通义千问等主流 API 服务。"),
             ("为什么 AI 没有回复？", "请检查：1) API 地址和密钥是否正确（可点击测试按钮）2) 网络连接是否正常 3) 余额是否充足。"),
             ("AI 能分析什么？", "AI 可以分析您的体检报告指标、提供健康建议、解答医学问题。请注意 AI 建议仅供参考，不能替代医生诊断。"),
         ]),

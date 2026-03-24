@@ -18,7 +18,7 @@
 		297039BB193274A163A92ED7 /* MedicalCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59FAFFC15CA55EB9A6AA042E /* MedicalCase.swift */; };
 		2A93E43B98E20581B729C902 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 297FAFF411A24D61DB139F53 /* RootView.swift */; };
 		300A15D0D7575334F431D316 /* AIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 981CFA5ACF871A3DA9E9D1CC /* AIChatView.swift */; };
-		30B7F2C5BC27BDEEE872E550 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40CB71E9B1A070E23B60196 /* OpenAIClient.swift */; };
+		30B7F2C5BC27BDEEE872E550 /* AIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E40CB71E9B1A070E23B60196 /* AIClient.swift */; };
 		34188312F1D1636FAA67DB8A /* RemoteServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 827FA29813DF7FC533C47A57 /* RemoteServices.swift */; };
 		3A5E23887E80A68043247BFF /* QRInviteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441E1D7337EB4DACDB593BBE /* QRInviteView.swift */; };
 		3F3BE59B34BD7D73DA99334C /* SWComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5525178E0299A718840F0226 /* SWComponents.swift */; };
@@ -115,7 +115,7 @@
 		DED2F08D042ACC666E07A5B8 /* SWAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWAlert.swift; sourceTree = "<group>"; };
 		E198161FF61448D0CB8B2A95 /* SWShimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SWShimmer.swift; sourceTree = "<group>"; };
 		E3E458836CDA2F874CF5ADCF /* LocalReportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalReportService.swift; sourceTree = "<group>"; };
-		E40CB71E9B1A070E23B60196 /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIClient.swift; sourceTree = "<group>"; };
+		E40CB71E9B1A070E23B60196 /* AIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIClient.swift; sourceTree = "<group>"; };
 		E4538966094192A67E6AFC4C /* ChatConversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatConversation.swift; sourceTree = "<group>"; };
 		EBC2586C409B2DD947A44306 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		FCEEA4442F5EF18100C0A6DE /* FamilyHealth.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FamilyHealth.entitlements; sourceTree = "<group>"; };
@@ -142,7 +142,7 @@
 			children = (
 				769E649837AB088F6097DFD7 /* LocalAIService.swift */,
 				AACC001122334455FFEE0003 /* HealthKitService.swift */,
-				E40CB71E9B1A070E23B60196 /* OpenAIClient.swift */,
+				E40CB71E9B1A070E23B60196 /* AIClient.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -440,7 +440,7 @@
 				6698B671E1961AE5AF3B4C1F /* MainTabView.swift in Sources */,
 				297039BB193274A163A92ED7 /* MedicalCase.swift in Sources */,
 				99720E06E017DE91CB9E4E5D /* OnboardingView.swift in Sources */,
-				30B7F2C5BC27BDEEE872E550 /* OpenAIClient.swift in Sources */,
+				30B7F2C5BC27BDEEE872E550 /* AIClient.swift in Sources */,
 				9DD6828903410CCBE02C9485 /* QRCodeGenerator.swift in Sources */,
 				3A5E23887E80A68043247BFF /* QRInviteView.swift in Sources */,
 				DA8A23F47D8BCEFB956843DA /* QRScannerView.swift in Sources */,

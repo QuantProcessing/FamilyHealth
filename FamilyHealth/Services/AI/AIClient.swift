@@ -1,9 +1,9 @@
 import Foundation
 
-/// OpenAI-compatible API client supporting streaming responses.
-/// Works with OpenAI, Claude (via proxy), Gemini, Ollama, and any
-/// OpenAI-compatible endpoint.
-actor OpenAIClient {
+/// AI API client supporting streaming responses.
+/// Works with DeepSeek, SiliconFlow, Kimi, and any
+/// compatible API endpoint.
+actor AIClient {
     struct ChatRequest: Encodable {
         let model: String
         let messages: [Message]

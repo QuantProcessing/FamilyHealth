@@ -2,12 +2,12 @@ import Foundation
 import SwiftData
 import NaturalLanguage
 
-/// Local AI service that uses user-configured OpenAI-compatible API
+/// Local AI service that uses user-configured API
 /// with RAG context from local health data.
 @MainActor
 final class LocalAIService: AIServiceProtocol {
     private let context: ModelContext
-    private let client = OpenAIClient()
+    private let client = AIClient()
 
     init(context: ModelContext) {
         self.context = context
@@ -49,7 +49,8 @@ final class LocalAIService: AIServiceProtocol {
                     5. 使用通俗易懂的语言解释专业术语
                     6. 如果数据不足以做出说明，请如实告知
                     7. 使用 Markdown 格式回复
-                    8. 每次回复的最后一行必须是："\n\n> ⚠️ 以上内容仅供参考，不构成医疗建议。如有不适请及时就医。"
+                    8. 涉及健康知识时必须注明信息来源，例如：“参考来源：《中国居民膳食指南（2022）》”、“参考来源：WHO 指南”、“参考来源：《内科学》教材”等权威来源
+                    9. 每次回复的最后一行必须是："\n\n> ⚠️ 以上内容仅供参考，不构成医疗建议。如有不适请及时就医。"
                     """
 
                     // 4. Build message array for API
@@ -96,6 +97,7 @@ final class LocalAIService: AIServiceProtocol {
         - 不推荐具体药物或治疗方案
         - 仅客观整理数据，不做疾病判断
         - 使用 Markdown 格式，用通俗语言解释专业术语
+        - 涉及健康知识时必须注明参考来源，例如：“参考来源：《中国居民膳食指南（2022）》”、“参考来源：WHO 指南”、“参考来源：《内科学》教材”等权威来源
         - 回复最后必须包含："\n\n> ⚠️ 以上内容仅为数据整理，不构成医疗诊断或建议。请携带报告咨询专业医生。"
         """
 

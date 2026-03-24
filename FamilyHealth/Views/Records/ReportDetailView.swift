@@ -16,6 +16,10 @@ struct ReportDetailView: View {
     @State private var alertMessage = ""
     @State private var isAnalyzing = false
 
+    // AI data consent
+    @AppStorage("hasConsentedAIDataSharing") private var hasConsentedAIDataSharing = false
+    @State private var showDataConsent = false
+
     private var defaultConfig: AIModelConfig? {
         aiConfigs.first(where: \.isDefault) ?? aiConfigs.first
     }
@@ -61,6 +65,15 @@ struct ReportDetailView: View {
             EditReportView(report: report)
         }
         .swAlert(isPresented: $showAlert, type: alertType, message: alertMessage)
+        .alert("AI 数据使用说明", isPresented: $showDataConsent) {
+            Button("不同意", role: .cancel) { }
+            Button("同意并分析") {
+                hasConsentedAIDataSharing = true
+                Task { await analyzeReport() }
+            }
+        } message: {
+            Text("分析报告时，报告文本摘要将通过 HTTPS 加密发送至第三方 AI 服务商（\(defaultConfig?.provider.displayName ?? "AI 服务商")）进行分析。\n\n我们不存储或转发您的数据。详情请查看隐私政策。")
+        }
     }
 
     // MARK: - File Preview
@@ -275,6 +288,12 @@ struct ReportDetailView: View {
             alertType = .error
             alertMessage = "请先在设置中配置 AI 模型"
             showAlert = true
+            return
+        }
+
+        // Check AI data consent before first use
+        if !hasConsentedAIDataSharing {
+            showDataConsent = true
             return
         }
         guard let apiKey = KeychainManager.getAPIKey(for: config.id) else {
