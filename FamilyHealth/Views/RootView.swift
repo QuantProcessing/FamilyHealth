@@ -44,15 +44,27 @@ struct RootView: View {
         appState.currentUserId = user.id.uuidString
     }
 
-    /// Auto-create the built-in free AI model config on first launch
+    /// Auto-create or migrate the built-in free AI model config
     private func ensureBuiltInAIModel() {
-        guard !aiConfigs.contains(where: { $0.isBuiltIn }) else { return }
+        // Migrate existing built-in from SiliconFlow to DeepSeek
+        if let existing = aiConfigs.first(where: { $0.isBuiltIn }) {
+            if existing.provider == .siliconflow {
+                existing.name = "免费模型 (DeepSeek)"
+                existing.provider = .deepseek
+                existing.apiEndpoint = AIModelConfig.Provider.deepseek.defaultEndpoint
+                existing.modelName = AIModelConfig.Provider.deepseek.defaultModel
+                existing.updatedAt = Date()
+                try? KeychainManager.saveAPIKey(AIModelConfig.builtInAPIKey, for: existing.id)
+                try? context.save()
+            }
+            return
+        }
 
         let config = AIModelConfig(
-            name: "免费模型 (InternLM)",
-            provider: .siliconflow,
-            apiEndpoint: AIModelConfig.Provider.siliconflow.defaultEndpoint,
-            modelName: AIModelConfig.Provider.siliconflow.defaultModel,
+            name: "免费模型 (DeepSeek)",
+            provider: .deepseek,
+            apiEndpoint: AIModelConfig.Provider.deepseek.defaultEndpoint,
+            modelName: AIModelConfig.Provider.deepseek.defaultModel,
             isDefault: aiConfigs.isEmpty,
             isBuiltIn: true
         )

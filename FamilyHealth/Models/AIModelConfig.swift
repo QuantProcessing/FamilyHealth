@@ -96,8 +96,16 @@ final class AIModelConfig {
         }
     }
 
-    /// Built-in free API key (SiliconFlow)
-    static let builtInAPIKey = "sk-gwfvvoogqemgpipnhyitauiaineagwiefyvwuplbclicdagr"
+    /// Built-in daily usage limit for the free model
+    static let builtInDailyLimit = 10
+
+    /// Built-in API key (DeepSeek) — lightly obfuscated
+    static var builtInAPIKey: String {
+        // Base64 of the key, reversed for minimal obfuscation
+        let reversed = "=MTNwIGN3IjMkJTOhVDZilDNlNDNiZmNzUjM4MmY2ITMts2c"
+        let b64 = String(reversed.reversed())
+        return String(data: Data(base64Encoded: b64)!, encoding: .utf8)!
+    }
 
     /// Proxy endpoint served by the FamilyHealth backend
     static let proxyEndpoint = "http://localhost:8080/api/v1/ai/proxy"

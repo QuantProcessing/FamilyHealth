@@ -26,6 +26,10 @@ struct AIChatView: View {
     @State private var showDataConsent = false
     @State private var pendingMessage: String?
 
+    // Daily limit tracking for built-in model
+    @AppStorage("builtInDailyCount") private var builtInDailyCount = 0
+    @AppStorage("builtInLastResetDate") private var builtInLastResetDate: Double = 0
+
     private var defaultConfig: AIModelConfig? {
         aiConfigs.first(where: \.isDefault) ?? aiConfigs.first
     }
@@ -368,6 +372,22 @@ struct AIChatView: View {
             return
         }
 
+        // Daily limit for built-in free model
+        if config.isBuiltIn {
+            let today = Calendar.current.startOfDay(for: Date())
+            let lastDate = Date(timeIntervalSince1970: builtInLastResetDate)
+            if Calendar.current.startOfDay(for: lastDate) != today {
+                builtInDailyCount = 0
+                builtInLastResetDate = today.timeIntervalSince1970
+            }
+            if builtInDailyCount >= AIModelConfig.builtInDailyLimit {
+                alertType = .error
+                alertMessage = "免费模型每日限 \(AIModelConfig.builtInDailyLimit) 次。如需更多次数，请在设置中配置您自己的 API Key。"
+                showAlert = true
+                return
+            }
+        }
+
         // Get API key from Keychain (works for both built-in and custom configs)
         guard let apiKey = KeychainManager.getAPIKey(for: config.id) else {
             alertType = .error
@@ -426,6 +446,11 @@ struct AIChatView: View {
                     conversation?.messages.append(assistantMsg)
                     conversation?.updatedAt = Date()
                     try? context.save()
+
+                    // Increment daily counter for built-in model
+                    if config.isBuiltIn {
+                        builtInDailyCount += 1
+                    }
                 } else {
                     alertType = .error
                     alertMessage = "AI 未返回内容，请检查模型配置\n\(config.apiEndpoint)"
